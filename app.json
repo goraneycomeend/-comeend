@@ -1,0 +1,54 @@
+{
+  "expo": {
+    "name": "발로 스킨 알리미",
+    "slug": "valorant-skin-alert",
+    "version": "1.0.0",
+    "scheme": "valoskinalert",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0f1923",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0f1923"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.comeend.valorantskinalert",
+      "infoPlist": {
+        "UIBackgroundModes": ["fetch", "processing"],
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.comeend.valorantskinalert",
+      "adaptiveIcon": {
+        "backgroundColor": "#0f1923",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-background-task",
+      "expo-secure-store",
+      "expo-image",
+      [
+        "expo-notifications",
+        {
+          "color": "#ff4655",
+          "defaultChannel": "skin-alerts"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
