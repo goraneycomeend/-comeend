@@ -75,6 +75,11 @@ eas build --platform ios                          # TestFlight 등
 3. **설정 탭**에서 알림 권한 허용, 백그라운드 확인이 "켜짐"인지 확인
 4. (선택) Discord 웹훅 URL 입력, 매일 요약 알림 / 상점 갱신 리마인더 켜기
 
+## 스토어 출시
+
+출시 절차와 리스크, 심사용 문서는 `docs/release-guide.md`, `docs/store-listing.md`, `docs/privacy-policy.md` 를 참고하세요.
+GitHub Actions 의 **Play 출시용 AAB (EAS)** 워크플로우가 Play Console 업로드용 App Bundle 을 만들어 Releases 에 올립니다 (`EXPO_TOKEN` 시크릿 필요).
+
 ## 개발
 
 ```bash
