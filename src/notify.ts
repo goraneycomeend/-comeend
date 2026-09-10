@@ -108,6 +108,15 @@ export async function notifySummary(account: Account, offers: ResolvedOffer[]): 
   useApp.getState().addHistory({ puuid: account.puuid, accountName: label, title, body, kind: 'summary', icon: offers[0]?.icon });
 }
 
+export async function notifyNightMarket(account: Account, offers: ResolvedOffer[]): Promise<void> {
+  const label = accountLabel(account);
+  const title = `🌙 ${label} 야시장이 열렸어요`;
+  const body = offers.map(formatOffer).join('\n');
+  await sendLocal(title, body, { puuid: account.puuid });
+  await sendDiscord(title, body, offers);
+  useApp.getState().addHistory({ puuid: account.puuid, accountName: label, title, body, kind: 'summary', icon: offers[0]?.icon });
+}
+
 export async function notifyReauth(account: Account): Promise<void> {
   const label = accountLabel(account);
   const title = `🔑 ${label} 다시 로그인 필요`;

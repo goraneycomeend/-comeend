@@ -1,7 +1,8 @@
 import '../src/background';
 import React, { useEffect, useRef } from 'react';
 import { AppState, type AppStateStatus } from 'react-native';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
+import * as Notifications from 'expo-notifications';
 import { StatusBar } from 'expo-status-bar';
 import { registerBackgroundCheck } from '../src/background';
 import { runCheck } from '../src/checker';
@@ -16,6 +17,14 @@ export default function RootLayout() {
   const hydrated = useHydrated();
   const accountCount = useApp((s) => s.accounts.length);
   const lastCheckedRef = useRef(0);
+  const router = useRouter();
+
+  useEffect(() => {
+    const sub = Notifications.addNotificationResponseReceivedListener(() => {
+      router.navigate('/(tabs)');
+    });
+    return () => sub.remove();
+  }, [router]);
 
   useEffect(() => {
     ensureChannel().catch(() => undefined);

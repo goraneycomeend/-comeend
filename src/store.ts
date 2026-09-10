@@ -25,6 +25,8 @@ export interface Settings {
   dailySummary: boolean;
   /** 매일 상점 갱신 시각에 앱 열기 리마인더 로컬 알림 */
   dailyReminder: boolean;
+  /** 야시장이 새로 열리면 목록을 알림으로 보낼지 */
+  nightMarketAlert: boolean;
   discordWebhookUrl: string;
   catalogLanguage: string;
 }
@@ -77,6 +79,7 @@ interface AppState {
 export const DEFAULT_SETTINGS: Settings = {
   dailySummary: false,
   dailyReminder: false,
+  nightMarketAlert: true,
   discordWebhookUrl: '',
   catalogLanguage: 'ko-KR',
 };
@@ -147,8 +150,24 @@ export const useApp = create<AppState>()(
     }),
     {
       name: 'valorant-skin-alert',
-      version: 1,
+      version: 2,
       storage: createJSONStorage(() => AsyncStorage),
+      // 새 설정 키가 추가돼도 기존 저장값 위에 기본값이 채워지도록 settings 는 깊게 병합한다.
+      merge: (persisted, current) => {
+        const p = (persisted ?? {}) as Partial<AppState>;
+        return { ...current, ...p, settings: { ...DEFAULT_SETTINGS, ...(p.settings ?? {}) } };
+      },
+      partialize: (s) => ({
+        accounts: s.accounts,
+        wishlist: s.wishlist,
+        settings: s.settings,
+        storeCache: s.storeCache,
+        history: s.history,
+        notifiedKeys: s.notifiedKeys,
+        checkedRotations: s.checkedRotations,
+        lastRun: s.lastRun,
+        catalog: s.catalog,
+      }),
     },
   ),
 );

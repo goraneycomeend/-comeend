@@ -80,7 +80,16 @@ export default function StoreScreen() {
         const matched = matchedByAccount[a.puuid] ?? new Set<string>();
         return (
           <View key={a.puuid} style={{ marginBottom: spacing.lg }}>
-            <SectionTitle right={statusBadge(a)}>{accountLabel(a)}</SectionTitle>
+            <SectionTitle
+              right={
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  {sf?.wallet ? <Text style={{ color: colors.vp, fontWeight: '800', fontSize: 13 }}>{sf.wallet.vp.toLocaleString()} VP</Text> : null}
+                  {statusBadge(a)}
+                </View>
+              }
+            >
+              {accountLabel(a)}
+            </SectionTitle>
             {a.status !== 'ok' && a.lastError ? <Muted style={{ marginBottom: spacing.sm } as never}>{a.lastError}</Muted> : null}
             {sf ? (
               <>

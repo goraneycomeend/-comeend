@@ -1,8 +1,12 @@
-import type { RiotSession, StoreOffer, Storefront, Catalog, ResolvedOffer, ResolvedStorefront } from './types';
+import type { RiotSession, StoreOffer, Storefront, Catalog, ResolvedOffer, ResolvedStorefront, Wallet } from './types';
 import { CLIENT_PLATFORM_B64, getClientVersion, ReauthRequiredError, RiotApiError } from './auth';
 
 /** VP 화폐 UUID */
 export const VP_CURRENCY_ID = '85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741';
+/** Radianite Points */
+export const RP_CURRENCY_ID = 'e59aa87c-4cbf-517a-5983-6e81511be9b7';
+/** Kingdom Credits */
+export const KC_CURRENCY_ID = '85ca954a-41f2-ce94-9b45-8ca3dd39a00d';
 
 export interface RawStorefront {
   SkinsPanelLayout?: {
@@ -46,6 +50,26 @@ export async function fetchRawStorefront(session: RiotSession): Promise<RawStore
   }
   if (!res.ok) throw new RiotApiError(`상점 조회 실패 (${res.status})`, res.status);
   return (await res.json()) as RawStorefront;
+}
+
+export async function fetchWallet(session: RiotSession): Promise<Wallet> {
+  const version = await getClientVersion();
+  const res = await fetch(`https://pd.${session.shard}.a.pvp.net/store/v1/wallet/${session.puuid}`, {
+    headers: {
+      Authorization: `Bearer ${session.accessToken}`,
+      'X-Riot-Entitlements-JWT': session.entitlementsToken,
+      'X-Riot-ClientPlatform': CLIENT_PLATFORM_B64,
+      'X-Riot-ClientVersion': version.riotClientVersion,
+    },
+  });
+  if (!res.ok) throw new RiotApiError(`지갑 조회 실패 (${res.status})`, res.status);
+  const json = (await res.json()) as { Balances?: Record<string, number> };
+  return parseWallet(json);
+}
+
+export function parseWallet(json: { Balances?: Record<string, number> }): Wallet {
+  const b = json.Balances ?? {};
+  return { vp: b[VP_CURRENCY_ID] ?? 0, rp: b[RP_CURRENCY_ID] ?? 0, kc: b[KC_CURRENCY_ID] ?? 0 };
 }
 
 function toIsoDateUtc(ms: number): string {
@@ -116,10 +140,11 @@ export function resolveOffer(offer: StoreOffer, kind: 'daily' | 'night_market', 
   };
 }
 
-export function resolveStorefront(puuid: string, sf: Storefront, catalog: Catalog): ResolvedStorefront {
+export function resolveStorefront(puuid: string, sf: Storefront, catalog: Catalog, wallet: Wallet | null = null): ResolvedStorefront {
   return {
     puuid,
     fetchedAt: sf.fetchedAt,
+    wallet,
     dailyRotationKey: sf.dailyRotationKey,
     dailyEndsAt: sf.fetchedAt + sf.dailyRemainingSeconds * 1000,
     daily: sf.daily.map((o) => resolveOffer(o, 'daily', catalog)),

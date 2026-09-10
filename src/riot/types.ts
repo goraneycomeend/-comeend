@@ -81,9 +81,17 @@ export interface ResolvedOffer extends StoreOffer {
   tierColor: string | null;
 }
 
+export interface Wallet {
+  vp: number;
+  rp: number;
+  kc: number;
+}
+
 export interface ResolvedStorefront {
   puuid: string;
   fetchedAt: number;
+  /** VP/RP/KC 잔액. 조회 실패 시 null */
+  wallet: Wallet | null;
   dailyRotationKey: string;
   dailyEndsAt: number;
   daily: ResolvedOffer[];

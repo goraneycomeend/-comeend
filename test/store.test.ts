@@ -67,3 +67,11 @@ describe('resolveStorefront', () => {
     expect(resolved.dailyEndsAt).toBe(NOW + REMAINING * 1000);
   });
 });
+
+describe('parseWallet', () => {
+  it('reads VP/RP/KC balances and defaults missing ones to 0', async () => {
+    const { parseWallet, RP_CURRENCY_ID } = await import('../src/riot/store');
+    expect(parseWallet({ Balances: { [VP_CURRENCY_ID]: 1234, [RP_CURRENCY_ID]: 56 } })).toEqual({ vp: 1234, rp: 56, kc: 0 });
+    expect(parseWallet({})).toEqual({ vp: 0, rp: 0, kc: 0 });
+  });
+});

@@ -2,15 +2,15 @@
  * 모든 연동 계정의 상점을 확인하고 위시리스트와 대조해 알림을 보낸다.
  * 포그라운드(앱 열림/수동)와 백그라운드 태스크 양쪽에서 호출된다.
  */
-import { buildSession, fetchRegion, fetchUserInfo, reauthWithSsid, ReauthRequiredError } from './riot/auth';
-import { expectedDailyRotationKey, fetchRawStorefront, parseStorefront, resolveStorefront } from './riot/store';
+import { buildSession, fetchRegion, fetchUserInfo, reauthWithSsid, ReauthRequiredError, RiotApiError } from './riot/auth';
+import { expectedDailyRotationKey, fetchRawStorefront, fetchWallet, parseStorefront, resolveStorefront } from './riot/store';
 import { catalogHasOffer, fetchCatalog } from './riot/catalog';
 import { clearRiotCookies, readRiotSsid } from './riot/cookies';
 import { isExpired, shardForRegion } from './riot/tokens';
 import type { Catalog, RiotSession, RiotTokens } from './riot/types';
 import { deleteSsid, loadSsid, saveSsid } from './storage/secure';
 import { matchWishlist, notifiedKey } from './matcher';
-import { notifyMatches, notifyReauth, notifySummary } from './notify';
+import { notifyMatches, notifyNightMarket, notifyReauth, notifySummary } from './notify';
 import { ensureHydrated, useApp, type Account, type LastRun, MAX_ACCOUNTS } from './store';
 
 /** 1시간짜리 세션은 메모리에만 둔다 (SecureStore 용량 제한 회피) */
@@ -116,7 +116,9 @@ async function checkOne(account: Account, trigger: LastRun['trigger']): Promise<
   const sf = parseStorefront(raw);
   const allIds = [...sf.daily, ...(sf.nightMarket ?? [])].map((o) => o.offerId);
   const catalog = await ensureCatalog(allIds);
-  const resolved = resolveStorefront(account.puuid, sf, catalog);
+  // 지갑 조회는 부가 정보라 실패해도 상점 확인은 계속한다.
+  const wallet = await fetchWallet(session).catch(() => state.storeCache[account.puuid]?.wallet ?? null);
+  const resolved = resolveStorefront(account.puuid, sf, catalog, wallet);
   state.setStoreCache(account.puuid, resolved);
 
   const allOffers = [...resolved.daily, ...resolved.nightMarket];
@@ -135,7 +137,39 @@ async function checkOne(account: Account, trigger: LastRun['trigger']): Promise<
     await notifySummary(account, resolved.daily);
   }
   state.markChecked(dailyCheckKey);
+
+  if (resolved.nightMarketRotationKey && resolved.nightMarket.length > 0) {
+    const nmKey = `${account.puuid}|${resolved.nightMarketRotationKey}`;
+    const nmMatchedIds = new Set(fresh.map((m) => m.offer.offerId));
+    if (!state.checkedRotations.includes(nmKey)) {
+      if (state.settings.nightMarketAlert && trigger !== 'manual') {
+        const rest = resolved.nightMarket.filter((o) => !nmMatchedIds.has(o.offerId));
+        if (rest.length > 0) await notifyNightMarket(account, rest);
+      }
+      state.markChecked(nmKey);
+    }
+  }
+
   state.patchAccount(account.puuid, { status: 'ok', lastError: null, lastCheckedAt: Date.now() });
+}
+
+/** 네트워크 끊김·5xx 같은 일시적 오류인지 */
+function isTransient(e: unknown): boolean {
+  if (e instanceof ReauthRequiredError) return false;
+  if (e instanceof RiotApiError) return e.status === undefined || e.status >= 500 || e.status === 429;
+  return e instanceof TypeError; // fetch 네트워크 실패
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+async function checkOneWithRetry(account: Account, trigger: LastRun['trigger']): Promise<void> {
+  try {
+    await checkOne(account, trigger);
+  } catch (e) {
+    if (!isTransient(e)) throw e;
+    await sleep(4000);
+    await checkOne(account, trigger);
+  }
 }
 
 export interface RunOptions {
@@ -166,7 +200,7 @@ async function doRun({ trigger, force = false }: RunOptions): Promise<LastRun> {
       continue;
     }
     try {
-      await checkOne(account, trigger);
+      await checkOneWithRetry(account, trigger);
       run.ok += 1;
     } catch (e) {
       run.failed += 1;

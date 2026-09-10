@@ -84,6 +84,11 @@ export default function SettingsScreen() {
           right={<Switch value={settings.dailySummary} onValueChange={(v) => setSettings({ dailySummary: v })} trackColor={{ true: colors.accent }} />}
         />
         <Row
+          label="야시장 열림 알림"
+          sub="야시장이 새로 열리면 할인 목록을 알림으로 보내요"
+          right={<Switch value={settings.nightMarketAlert} onValueChange={(v) => setSettings({ nightMarketAlert: v })} trackColor={{ true: colors.accent }} />}
+        />
+        <Row
           label="상점 갱신 리마인더"
           sub={`매일 ${reminder.hour}:${String(reminder.minute).padStart(2, '0')}에 앱 열기 알림 (백그라운드 확인이 안 될 때 대비)`}
           right={

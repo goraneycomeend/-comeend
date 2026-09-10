@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native';
 import { Image } from 'expo-image';
-import { Body, Button, Card, Chip, Empty, Muted, Screen, SectionTitle, Title, styles as ui } from '../../src/components/ui';
+import { Badge, Body, Button, Card, Chip, Empty, Muted, Screen, SectionTitle, Title, styles as ui } from '../../src/components/ui';
+import { matchWishlist } from '../../src/matcher';
 import { refreshCatalog } from '../../src/checker';
 import { searchCatalog } from '../../src/riot/catalog';
 import { accountLabel, useApp } from '../../src/store';
@@ -13,6 +14,20 @@ export default function WishlistScreen() {
   const accounts = useApp((s) => s.accounts);
   const addWish = useApp((s) => s.addWish);
   const removeWish = useApp((s) => s.removeWish);
+  const storeCache = useApp((s) => s.storeCache);
+
+  /** 위시 항목별로 지금 상점에 떠 있는 계정 이름 목록 */
+  const inStore = useMemo(() => {
+    const out: Record<string, string[]> = {};
+    for (const a of accounts) {
+      const sf = storeCache[a.puuid];
+      if (!sf) continue;
+      for (const m of matchWishlist([...sf.daily, ...sf.nightMarket], wishlist, a.puuid)) {
+        (out[m.entry.id] ??= []).push(accountLabel(a));
+      }
+    }
+    return out;
+  }, [accounts, storeCache, wishlist]);
 
   const [query, setQuery] = useState('');
   const [scope, setScope] = useState<string | null>(null);
@@ -124,6 +139,11 @@ export default function WishlistScreen() {
               {w.weapon ? `${w.weapon} · ` : ''}
               {scopeLabel(w.accountPuuid)}
             </Muted>
+            {inStore[w.id] ? (
+              <View style={{ marginTop: 4, alignSelf: 'flex-start' }}>
+                <Badge text={`지금 상점에 있음 · ${inStore[w.id].join(', ')}`} color={colors.success} />
+              </View>
+            ) : null}
           </View>
           <Button title="삭제" small variant="danger" onPress={() => removeWish(w.id)} />
         </Card>
