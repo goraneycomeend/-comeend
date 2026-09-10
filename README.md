@@ -1,9 +1,30 @@
-# 스킨지기 (Skinjigi)
+<p align="center">
+  <img src="assets/icon.png" width="120" alt="스킨지기 아이콘">
+</p>
 
-발로란트 계정을 **최대 5개** 연동해 두면, 매일 상점이 갱신될 때(UTC 00:00 = 한국 시간 09:00) 각 계정의 상점을 확인하고
-**위시리스트에 등록한 스킨이 뜨면 휴대폰 알림**을 보내주는 앱입니다. 야시장(Night Market) 도 함께 확인합니다.
+<h1 align="center">스킨지기</h1>
 
-Expo(React Native) 로 만든 iOS / Android 앱이며, 별도 서버 없이 **모든 처리가 휴대폰 안에서** 이루어집니다.
+<p align="center">
+  VALORANT 계정을 최대 5개 등록해 두면, 매일 상점이 갱신될 때 확인해서<br>
+  <b>위시리스트에 담은 스킨이 뜨면 휴대폰으로 알림</b>을 보내주는 안드로이드 앱
+</p>
+
+<p align="center">
+  <a href="https://github.com/goraneycomeend/-comeend/releases/latest"><b>📥 최신 APK 다운로드</b></a>
+</p>
+
+> 스토어에는 올리지 않는 개인 제작 앱입니다. Riot Games 와 무관한 비공식 앱이며, Riot 이 공식 제공하지 않는 API 를 사용합니다.
+> 사용에 따른 책임은 본인에게 있으며, Riot 정책 변경으로 언제든 동작이 멈출 수 있습니다.
+
+## 설치 (안드로이드)
+
+1. 폰에서 [최신 릴리스](https://github.com/goraneycomeend/-comeend/releases/latest) 페이지를 열고 `skinjigi-N.apk` 를 눌러 다운로드
+2. 파일을 열면 "출처를 알 수 없는 앱" 경고가 뜹니다 → 브라우저의 설치 허용을 켜고 설치
+3. 앱 실행 → **계정** 탭에서 라이엇 로그인 (계정마다 반복) → **위시리스트** 에 스킨 등록 → **설정** 에서 알림 권한 허용
+4. 삼성 등 배터리 절전이 강한 기기는 설정 → 배터리에서 이 앱을 절전 대상에서 제외 (안 하면 자동 알림이 늦거나 안 올 수 있음)
+
+업데이트는 새 APK 를 기존 앱 위에 덮어 설치하면 되고, 데이터는 유지됩니다.
+iOS 는 빌드 파일을 제공하지 않습니다. 직접 빌드하려면 아래 [개발](#개발) 항목을 참고하세요.
 
 ## 주요 기능
 
@@ -34,20 +55,7 @@ Expo(React Native) 로 만든 iOS / Android 앱이며, 별도 서버 없이 **�
 - 로테이션 키(`daily:YYYY-MM-DD`)로 "이미 확인한 상점"을 기억해, 백그라운드 실행이 여러 번 돼도 네트워크 요청과 알림이 중복되지 않습니다.
 - 토큰(1시간)은 메모리에만 두고, 오래 가는 `ssid` 쿠키만 기기 보안 저장소(Keychain / Keystore)에 저장합니다.
 
-## 시작하기
-
-### 방법 A. 컴퓨터 없이 폰만으로 (Android)
-
-이 저장소에 코드가 푸시될 때마다 GitHub Actions 가 자동으로 APK 를 빌드해 **Releases** 에 올립니다.
-
-1. 폰 브라우저로 https://github.com/goraneycomeend/-comeend/releases 접속
-2. 가장 최근 릴리스의 `skinjigi-N.apk` 파일을 눌러 다운로드
-3. "출처를 알 수 없는 앱" 경고가 뜨면 브라우저의 설치 권한을 허용하고 설치
-4. 삼성 등 배터리 최적화가 강한 기기는 설정 → 배터리에서 이 앱을 절전 대상에서 제외
-
-빌드를 다시 돌리고 싶으면 GitHub 의 **Actions → Android APK → Run workflow** 를 누르면 됩니다.
-
-### 방법 B. 컴퓨터에서 직접 빌드
+## 직접 빌드하기
 
 > Expo Go 로는 실행할 수 없습니다. 백그라운드 태스크·쿠키 접근·SecureStore 가 네이티브 모듈이라 **개발 빌드(Dev Client) 또는 EAS 빌드**가 필요합니다.
 
@@ -70,16 +78,11 @@ eas build --platform android --profile preview   # APK
 eas build --platform ios                          # TestFlight 등
 ```
 
-### 앱에서 할 일
+GitHub Actions 는 이 저장소에 푸시될 때마다 APK 를 빌드해 Releases 에 올립니다 (`.github/workflows/android-apk.yml`).
 
-1. **계정 탭 → 라이엇 계정 연동** → 라이엇 로그인 (계정마다 반복, 최대 5개)
-2. **위시리스트 탭**에서 스킨 검색 후 추가 (또는 키워드 추가)
-3. **설정 탭**에서 알림 권한 허용, 백그라운드 확인이 "켜짐"인지 확인
-4. (선택) Discord 웹훅 URL 입력, 매일 요약 알림 / 상점 갱신 리마인더 켜기
+## 스토어 출시 (하지 않음)
 
-## 스토어 출시
-
-출시 절차와 리스크, 심사용 문서는 `docs/release-guide.md`, `docs/store-listing.md`, `docs/privacy-policy.md` 를 참고하세요.
+스토어에는 올리지 않기로 했습니다. 참고용으로 남겨 둔 절차와 문서는 `docs/release-guide.md`, `docs/store-listing.md`, `docs/privacy-policy.md` 를 참고하세요.
 GitHub Actions 의 **Play 출시용 AAB (EAS)** 워크플로우가 Play Console 업로드용 App Bundle 을 만들어 Releases 에 올립니다 (`EXPO_TOKEN` 시크릿 필요).
 
 ## 개발
@@ -120,3 +123,7 @@ test/                 vitest 단위 테스트
 - **세션 만료**: ssid 쿠키는 보통 몇 주~몇 달 유지되지만 비밀번호 변경·기기 정리 등으로 만료되면 "다시 로그인 필요" 알림이 오고, 계정 탭에서 다시 로그인하면 됩니다.
 - **Android 쿠키 공유**: RN 의 fetch 는 WebView 와 쿠키 저장소를 공유하므로, 앱은 계정별 요청 전후로 라이엇 쿠키를 비워 계정이 섞이지 않게 합니다.
 - 스킨 이름·이미지는 [valorant-api.com](https://valorant-api.com) 을 사용하며, 언어는 설정의 카탈로그 언어(기본 `ko-KR`)를 따릅니다.
+
+## 라이선스
+
+MIT
