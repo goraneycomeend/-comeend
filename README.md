@@ -34,6 +34,19 @@ Expo(React Native) 로 만든 iOS / Android 앱이며, 별도 서버 없이 **�
 
 ## 시작하기
 
+### 방법 A. 컴퓨터 없이 폰만으로 (Android)
+
+이 저장소에 코드가 푸시될 때마다 GitHub Actions 가 자동으로 APK 를 빌드해 **Releases** 에 올립니다.
+
+1. 폰 브라우저로 https://github.com/goraneycomeend/-comeend/releases 접속
+2. 가장 최근 릴리스의 `valo-skin-alert-N.apk` 파일을 눌러 다운로드
+3. "출처를 알 수 없는 앱" 경고가 뜨면 브라우저의 설치 권한을 허용하고 설치
+4. 삼성 등 배터리 최적화가 강한 기기는 설정 → 배터리에서 이 앱을 절전 대상에서 제외
+
+빌드를 다시 돌리고 싶으면 GitHub 의 **Actions → Android APK → Run workflow** 를 누르면 됩니다.
+
+### 방법 B. 컴퓨터에서 직접 빌드
+
 > Expo Go 로는 실행할 수 없습니다. 백그라운드 태스크·쿠키 접근·SecureStore 가 네이티브 모듈이라 **개발 빌드(Dev Client) 또는 EAS 빌드**가 필요합니다.
 
 ```bash
