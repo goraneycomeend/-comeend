@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "발로 스킨 알리미",
-    "slug": "valorant-skin-alert",
+    "name": "스킨지기",
+    "slug": "skinjigi",
     "version": "1.0.0",
-    "scheme": "valoskinalert",
+    "scheme": "skinjigi",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -15,14 +15,14 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.comeend.valorantskinalert",
+      "bundleIdentifier": "com.comeend.skinjigi",
       "infoPlist": {
         "UIBackgroundModes": ["fetch", "processing"],
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
-      "package": "com.comeend.valorantskinalert",
+      "package": "com.comeend.skinjigi",
       "adaptiveIcon": {
         "backgroundColor": "#0f1923",
         "foregroundImage": "./assets/android-icon-foreground.png",

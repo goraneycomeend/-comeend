@@ -60,7 +60,7 @@
 
 진행 순서(컴퓨터 1회 필요):
 
-1. App Store Connect 에서 앱 등록 (Bundle ID `com.comeend.valorantskinalert`)
+1. App Store Connect 에서 앱 등록 (Bundle ID `com.comeend.skinjigi`)
 2. 컴퓨터에서 `eas build --platform ios --profile production` 실행 → Apple 계정 로그인 → EAS 가 인증서 자동 생성
 3. `eas submit --platform ios` 로 TestFlight 업로드 → App Store Connect 에서 심사 제출
 4. 심사 노트에 테스트용 Riot 계정을 반드시 기재

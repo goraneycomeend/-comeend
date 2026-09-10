@@ -48,7 +48,7 @@ jobs:
         run: |
           URL=$(python3 -c 'import json;d=json.load(open("build.json"));d=d[0] if isinstance(d,list) else d;print(d["artifacts"]["buildUrl"])')
           PAGE=$(python3 -c 'import json;d=json.load(open("build.json"));d=d[0] if isinstance(d,list) else d;print(d.get("buildDetailsPageUrl") or "")')
-          curl -sSL "$URL" -o "valo-skin-alert-${{ github.run_number }}.aab"
+          curl -sSL "$URL" -o "skinjigi-${{ github.run_number }}.aab"
           echo "page=$PAGE" >> "$GITHUB_OUTPUT"
           {
             echo "## Play 업로드용 AAB 준비 완료"
@@ -60,7 +60,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: play-aab
-          path: valo-skin-alert-${{ github.run_number }}.aab
+          path: skinjigi-${{ github.run_number }}.aab
 
       - uses: softprops/action-gh-release@v2
         with:
@@ -69,4 +69,4 @@ jobs:
           body: |
             Google Play Console 에 업로드할 App Bundle 입니다. (폰에 직접 설치되는 파일이 아닙니다)
             Expo 빌드 페이지: ${{ steps.out.outputs.page }}
-          files: valo-skin-alert-${{ github.run_number }}.aab
+          files: skinjigi-${{ github.run_number }}.aab

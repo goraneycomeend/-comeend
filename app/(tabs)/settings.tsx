@@ -179,7 +179,7 @@ export default function SettingsScreen() {
       <SectionTitle>정보</SectionTitle>
       <Card>
         <Muted>
-          발로 스킨 알리미 v{Constants.expoConfig?.version ?? '1.0.0'}{'\n'}
+          스킨지기 v{Constants.expoConfig?.version ?? '1.0.0'}{'\n'}
           이 앱은 Riot Games 와 무관한 비공식 앱이며, 비공식 API 를 사용해요. 스킨 데이터는 valorant-api.com 을 이용해요.
           상점 갱신은 매일 UTC 00:00 (한국 시간 09:00) 이에요.
         </Muted>

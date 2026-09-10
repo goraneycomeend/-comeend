@@ -54,20 +54,20 @@ jobs:
         id: apk
         run: |
           SRC=$(ls android/app/build/outputs/apk/release/*.apk | head -1)
-          DEST="valo-skin-alert-${{ github.run_number }}.apk"
+          DEST="skinjigi-${{ github.run_number }}.apk"
           cp "$SRC" "$DEST"
           echo "path=$DEST" >> "$GITHUB_OUTPUT"
 
       - uses: actions/upload-artifact@v4
         with:
-          name: valo-skin-alert-apk
+          name: skinjigi-apk
           path: ${{ steps.apk.outputs.path }}
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: build-${{ github.run_number }}
-          name: 발로 스킨 알리미 빌드 #${{ github.run_number }}
+          name: 스킨지기 빌드 #${{ github.run_number }}
           body: |
             폰에서 아래 `.apk` 파일을 눌러 다운로드한 뒤 설치하세요.
             브랜치: `${{ github.ref_name }}` · 커밋: `${{ github.sha }}`

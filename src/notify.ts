@@ -60,7 +60,7 @@ async function sendDiscord(title: string, description: string, offers: ResolvedO
       value: o.discountedCost != null ? `~~${o.cost}~~ **${o.discountedCost} VP** (-${o.discountPercent}%)` : `${o.cost} VP`,
       inline: true,
     })),
-    footer: { text: '발로 스킨 알리미' },
+    footer: { text: '스킨지기' },
     timestamp: new Date().toISOString(),
   };
   try {

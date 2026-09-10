@@ -4,7 +4,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 import type { Catalog, ResolvedStorefront } from './riot/types';
 import type { WishlistEntry } from './matcher';
 
-export const MAX_ACCOUNTS = 4;
+export const MAX_ACCOUNTS = 5;
 
 export type AccountStatus = 'ok' | 'reauth_required' | 'error' | 'new';
 
