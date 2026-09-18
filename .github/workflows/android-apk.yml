@@ -32,6 +32,10 @@ jobs:
           java-version: 17
 
       - uses: android-actions/setup-android@v3
+        with:
+          # 기본값 'tools platform-tools' 의 'tools' 패키지는 SDK 저장소에서 사라져 실패하므로 제외
+          packages: platform-tools
+          log-accepted-android-sdk-licenses: false
 
       - uses: gradle/actions/setup-gradle@v4
 
@@ -72,3 +76,5 @@ jobs:
             폰에서 아래 `.apk` 파일을 눌러 다운로드한 뒤 설치하세요.
             브랜치: `${{ github.ref_name }}` · 커밋: `${{ github.sha }}`
           files: ${{ steps.apk.outputs.path }}
+          # main 이 아닌 브랜치 빌드는 프리릴리스로 표시해 /releases/latest 가 main 빌드만 가리키게 한다
+          prerelease: ${{ github.ref_name != 'main' }}
