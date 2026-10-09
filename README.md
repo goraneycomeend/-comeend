@@ -124,6 +124,10 @@ test/                 vitest 단위 테스트
 - **Android 쿠키 공유**: RN 의 fetch 는 WebView 와 쿠키 저장소를 공유하므로, 앱은 계정별 요청 전후로 라이엇 쿠키를 비워 계정이 섞이지 않게 합니다.
 - 스킨 이름·이미지는 [valorant-api.com](https://valorant-api.com) 을 사용하며, 언어는 설정의 카탈로그 언어(기본 `ko-KR`)를 따릅니다.
 
+## 요원보이스 (음성 변환 앱)
+
+마이크로 말하면 VALORANT 요원 목소리로 바꿔 주는 별도 앱이 `voice-changer/` 에 있습니다. PC 에서 Python 서버 + 브라우저로 동작하며, 요원별 RVC 모델을 넣으면 음색을 바꾸고 모델이 없으면 DSP 폴백으로 동작합니다. 설치·모델 준비·가상 마이크 설정은 [voice-changer/README.md](voice-changer/README.md) 를 참고하세요.
+
 ## 라이선스
 
 MIT

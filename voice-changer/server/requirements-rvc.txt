@@ -1,0 +1,8 @@
+# RVC 엔진용 추가 의존성. Python 3.10 ~ 3.11 권장 (fairseq 계열이 3.12+ 에서 빌드가 깨지는 경우가 많음).
+#
+# torch 는 GPU 에 맞는 빌드를 먼저 설치하세요. 예) CUDA 12.x:
+#   pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu124
+# 그 다음:
+#   pip install -r requirements-rvc.txt
+-r requirements.txt
+rvc-python>=0.1.5

@@ -1,0 +1,36 @@
+{
+  "_comment": "요원별 설정. model/index 는 이 파일이 있는 디렉터리 기준 경로이며 저장소에 포함되지 않는다. pitch 는 RVC f0 보정(반음). dsp 는 모델이 없을 때 쓰는 폴백 프리셋(성인 남성 평균 음역 기준 상대값)으로, UI 의 피치 보정으로 본인 목소리에 맞춘다.",
+  "agents": [
+    { "id": "jett",      "name": "제트",     "nameEn": "Jett",      "role": "duelist",    "color": "#9fd8e8", "model": "models/jett.pth",      "index": "models/jett.index",      "pitch": 0, "dsp": { "pitch": 7,  "formant": 1.18 } },
+    { "id": "phoenix",   "name": "피닉스",   "nameEn": "Phoenix",   "role": "duelist",    "color": "#ff8a3d", "model": "models/phoenix.pth",   "index": "models/phoenix.index",   "pitch": 0, "dsp": { "pitch": 1,  "formant": 1.02 } },
+    { "id": "reyna",     "name": "레이나",   "nameEn": "Reyna",     "role": "duelist",    "color": "#b45cff", "model": "models/reyna.pth",     "index": "models/reyna.index",     "pitch": 0, "dsp": { "pitch": 4,  "formant": 1.12 } },
+    { "id": "raze",      "name": "레이즈",   "nameEn": "Raze",      "role": "duelist",    "color": "#ffb020", "model": "models/raze.pth",      "index": "models/raze.index",      "pitch": 0, "dsp": { "pitch": 6,  "formant": 1.15 } },
+    { "id": "yoru",      "name": "요루",     "nameEn": "Yoru",      "role": "duelist",    "color": "#3d5bff", "model": "models/yoru.pth",      "index": "models/yoru.index",      "pitch": 0, "dsp": { "pitch": 0,  "formant": 1.0 } },
+    { "id": "neon",      "name": "네온",     "nameEn": "Neon",      "role": "duelist",    "color": "#4bd8ff", "model": "models/neon.pth",      "index": "models/neon.index",      "pitch": 0, "dsp": { "pitch": 8,  "formant": 1.2 } },
+    { "id": "iso",       "name": "아이소",   "nameEn": "Iso",       "role": "duelist",    "color": "#8b7bff", "model": "models/iso.pth",       "index": "models/iso.index",       "pitch": 0, "dsp": { "pitch": -1, "formant": 0.98 } },
+    { "id": "waylay",    "name": "웨이레이", "nameEn": "Waylay",    "role": "duelist",    "color": "#ffd166", "model": "models/waylay.pth",    "index": "models/waylay.index",    "pitch": 0, "dsp": { "pitch": 6,  "formant": 1.16 } },
+
+    { "id": "sova",      "name": "소바",     "nameEn": "Sova",      "role": "initiator",  "color": "#5aa9ff", "model": "models/sova.pth",      "index": "models/sova.index",      "pitch": 0, "dsp": { "pitch": -2, "formant": 0.97 } },
+    { "id": "breach",    "name": "브리치",   "nameEn": "Breach",    "role": "initiator",  "color": "#ff7a45", "model": "models/breach.pth",    "index": "models/breach.index",    "pitch": 0, "dsp": { "pitch": -4, "formant": 0.93 } },
+    { "id": "skye",      "name": "스카이",   "nameEn": "Skye",      "role": "initiator",  "color": "#7ddc6a", "model": "models/skye.pth",      "index": "models/skye.index",      "pitch": 0, "dsp": { "pitch": 5,  "formant": 1.14 } },
+    { "id": "kayo",      "name": "케이/오",  "nameEn": "KAY/O",     "role": "initiator",  "color": "#9aa7b8", "model": "models/kayo.pth",      "index": "models/kayo.index",      "pitch": 0, "dsp": { "pitch": -1, "formant": 0.97, "fx": "robot" } },
+    { "id": "fade",      "name": "페이드",   "nameEn": "Fade",      "role": "initiator",  "color": "#5c4b8a", "model": "models/fade.pth",      "index": "models/fade.index",      "pitch": 0, "dsp": { "pitch": 3,  "formant": 1.1 } },
+    { "id": "gekko",     "name": "게코",     "nameEn": "Gekko",     "role": "initiator",  "color": "#a3e635", "model": "models/gekko.pth",     "index": "models/gekko.index",     "pitch": 0, "dsp": { "pitch": 2,  "formant": 1.04 } },
+    { "id": "tejo",      "name": "테호",     "nameEn": "Tejo",      "role": "initiator",  "color": "#f59e0b", "model": "models/tejo.pth",      "index": "models/tejo.index",      "pitch": 0, "dsp": { "pitch": -3, "formant": 0.95 } },
+
+    { "id": "brimstone", "name": "브림스톤", "nameEn": "Brimstone", "role": "controller", "color": "#d97706", "model": "models/brimstone.pth", "index": "models/brimstone.index", "pitch": 0, "dsp": { "pitch": -5, "formant": 0.9,  "fx": "radio" } },
+    { "id": "viper",     "name": "바이퍼",   "nameEn": "Viper",     "role": "controller", "color": "#22c55e", "model": "models/viper.pth",     "index": "models/viper.index",     "pitch": 0, "dsp": { "pitch": 3,  "formant": 1.08 } },
+    { "id": "omen",      "name": "오멘",     "nameEn": "Omen",      "role": "controller", "color": "#6366f1", "model": "models/omen.pth",      "index": "models/omen.index",      "pitch": 0, "dsp": { "pitch": -6, "formant": 0.9,  "fx": "ghost" } },
+    { "id": "astra",     "name": "아스트라", "nameEn": "Astra",     "role": "controller", "color": "#c084fc", "model": "models/astra.pth",     "index": "models/astra.index",     "pitch": 0, "dsp": { "pitch": 4,  "formant": 1.12 } },
+    { "id": "harbor",    "name": "하버",     "nameEn": "Harbor",    "role": "controller", "color": "#0ea5e9", "model": "models/harbor.pth",    "index": "models/harbor.index",    "pitch": 0, "dsp": { "pitch": -2, "formant": 0.96 } },
+    { "id": "clove",     "name": "클로브",   "nameEn": "Clove",     "role": "controller", "color": "#f472b6", "model": "models/clove.pth",     "index": "models/clove.index",     "pitch": 0, "dsp": { "pitch": 5,  "formant": 1.14 } },
+
+    { "id": "sage",      "name": "세이지",   "nameEn": "Sage",      "role": "sentinel",   "color": "#67e8f9", "model": "models/sage.pth",      "index": "models/sage.index",      "pitch": 0, "dsp": { "pitch": 4,  "formant": 1.12 } },
+    { "id": "cypher",    "name": "사이퍼",   "nameEn": "Cypher",    "role": "sentinel",   "color": "#e5e7eb", "model": "models/cypher.pth",    "index": "models/cypher.index",    "pitch": 0, "dsp": { "pitch": -1, "formant": 0.98, "fx": "radio" } },
+    { "id": "killjoy",   "name": "킬조이",   "nameEn": "Killjoy",   "role": "sentinel",   "color": "#facc15", "model": "models/killjoy.pth",   "index": "models/killjoy.index",   "pitch": 0, "dsp": { "pitch": 6,  "formant": 1.16 } },
+    { "id": "chamber",   "name": "체임버",   "nameEn": "Chamber",   "role": "sentinel",   "color": "#eab308", "model": "models/chamber.pth",   "index": "models/chamber.index",   "pitch": 0, "dsp": { "pitch": -2, "formant": 0.96 } },
+    { "id": "deadlock",  "name": "데드록",   "nameEn": "Deadlock",  "role": "sentinel",   "color": "#94a3b8", "model": "models/deadlock.pth",  "index": "models/deadlock.index",  "pitch": 0, "dsp": { "pitch": 3,  "formant": 1.1 } },
+    { "id": "vyse",      "name": "바이스",   "nameEn": "Vyse",      "role": "sentinel",   "color": "#a78bfa", "model": "models/vyse.pth",      "index": "models/vyse.index",      "pitch": 0, "dsp": { "pitch": 2,  "formant": 1.08, "fx": "ghost" } },
+    { "id": "veto",      "name": "비토",     "nameEn": "Veto",      "role": "sentinel",   "color": "#dc2626", "model": "models/veto.pth",      "index": "models/veto.index",      "pitch": 0, "dsp": { "pitch": -4, "formant": 0.93 } }
+  ]
+}

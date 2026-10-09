@@ -5,6 +5,7 @@ on:
     branches: ['**']
     paths-ignore:
       - '**.md'
+      - 'voice-changer/**'
   workflow_dispatch:
 
 permissions:

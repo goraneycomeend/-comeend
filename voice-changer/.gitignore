@@ -1,0 +1,14 @@
+# 모델 파일은 저장소에 넣지 않는다
+server/models/*
+!server/models/README.md
+
+# Python
+server/.venv/
+server/venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Web
+web/node_modules/
+web/dist/
