@@ -63,13 +63,30 @@ npm run build        # → web/dist, 서버가 자동으로 서빙 → http://12
    pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu124
    pip install -r requirements-rvc.txt
    ```
-2. 모델 파일을 `server/models/` 에 넣습니다. 파일 이름은 `server/agents.json` 의 `model` / `index` 와 맞추면 됩니다 (기본: `models/jett.pth`, `models/jett.index` …).
-3. 서버를 다시 시작하면 해당 요원 카드가 `RVC` 배지로 바뀝니다. `/api/agents` 에서 `ready: true` 로 확인할 수 있습니다.
+2. 모델을 넣습니다. 세 가지 방법 중 편한 것을 쓰면 됩니다.
+   - **브라우저**: 요원을 고르면 요원 그리드 아래 **"○○ 모델"** 상자가 나옵니다. `.pth`(또는 `.pth`+`.index` 가 든 `.zip`) 를 올리고 **설치** 를 누르면 끝.
+   - **CLI**:
+     ```bash
+     python -m agent_voice.models install jett ~/Downloads/JettV2.zip          # zip 안의 .pth/.index 자동 인식
+     python -m agent_voice.models install jett jett.pth --index jett.index
+     python -m agent_voice.models install jett https://example.com/jett.zip   # URL 도 가능
+     python -m agent_voice.models list / scan <file> / remove jett
+     ```
+   - **수동**: `server/models/jett.pth`, `server/models/jett.index` 처럼 `server/agents.json` 의 경로에 맞춰 복사.
+3. 요원 카드가 `RVC` 배지로 바뀌면 준비 완료입니다 (`/api/agents` 의 `ready: true`). 서버 재시작은 필요 없습니다.
 
-모델을 구하는 방법은 두 가지입니다.
+**안전 검사**: `.pth` 는 pickle 이라 아무 코드나 숨길 수 있습니다. 브라우저·CLI 로 설치하면 torch 로 열기 전에 제한된 언피클러로 내용물을 읽어, 텐서·설정 외의 객체(예: `os.system`)가 들어 있으면 거부합니다. 출처가 불분명한 파일은 `python -m agent_voice.models scan 파일.pth` 로 먼저 확인하세요.
 
-- **직접 학습**: [RVC WebUI](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI) 로 요원별 깨끗한 음성 샘플(배경음 없는 대사, 10분 이상 권장)을 학습합니다. 음성 샘플의 저작권·사용 범위는 본인이 확인하세요.
-- **공개 모델 사용**: 커뮤니티에 올라온 RVC v2 모델을 내려받아 넣습니다. 출처와 이용 조건을 반드시 확인하세요.
+### 모델을 구하는 방법
+
+이 저장소는 요원 모델을 배포하지 않습니다. 요원 대사는 Riot 의 저작물이고 실제 성우의 음성이기 때문에, 게임 음성 파일·유튜브 대사 모음 등을 가져다 학습하는 것은 권리 문제가 있어 권하지 않습니다.
+
+- **직접 학습 (권리가 있는 음성으로)**: 본인 목소리나 동의한 화자의 녹음으로 "요원 느낌" 의 목소리를 만들 수 있습니다.
+  1. 깨끗한 음성(배경음 없음, 20~40분 권장)을 한 폴더에 모읍니다.
+  2. `python tools/prepare_dataset.py raw/ dataset/myvoice --sr 40000` 으로 3~10초 조각으로 정리합니다.
+  3. [RVC WebUI](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI) 에서 v2 · 40k · rmvpe 로 200~300 epoch 학습하고 index 도 함께 만듭니다.
+  4. 결과 `.pth` / `.index` 를 위 방법으로 원하는 요원 슬롯에 설치합니다.
+- **공개 모델 사용**: 커뮤니티에 올라온 RVC v2 모델을 쓸 수도 있습니다. 출처·이용 조건을 반드시 확인하고, 설치 전 안전 검사를 거치세요.
 
 품질 조정은 `agents.json` 의 `pitch`(요원별 반음 보정) 와 `server/agent_voice/engines/rvc.py` 의 `DEFAULT_PARAMS`(`index_rate`, `protect`, `f0method`) 로 합니다. `index_rate` 를 올리면 모델 음색에 가까워지고, 내리면 발음이 또렷해집니다.
 

@@ -12,6 +12,8 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import shutil
+import tempfile
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -26,11 +28,13 @@ from .agents import AgentRegistry
 from .audio import decode, encode_wav
 from .config import Settings, load_settings
 from .engines import ConvertOptions, EngineManager
+from .models import ARCHIVE_SUFFIXES, CHECKPOINT_SUFFIXES, INDEX_SUFFIXES, ModelError, install_model, remove_model
 from .stream import StreamSession
 
 log = logging.getLogger("agent_voice")
 
 MAX_UPLOAD_BYTES = 50 * 1024 * 1024
+MAX_MODEL_BYTES = 1024 * 1024 * 1024  # 모델 업로드 상한 1GB (.pth 는 보통 50~60MB, .index 는 수백 MB 까지)
 MAX_CHUNK_SAMPLES = 48_000 * 5  # 스트리밍 청크 상한 5초
 SAMPLE_RATES = (16_000, 22_050, 24_000, 32_000, 44_100, 48_000, 96_000)
 
@@ -70,27 +74,93 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "agentsFile": str(s.agents_file),
         }
 
+    def _agent_json(a, engines: EngineManager) -> dict:
+        return {
+            "id": a.id,
+            "name": a.name,
+            "nameEn": a.name_en,
+            "role": a.role,
+            "roleKo": a.role_ko,
+            "color": a.color,
+            "ready": a.model_ready,
+            "hasIndex": bool(a.index is not None and a.index.is_file()),
+            "engine": engines.engine_name(a),
+            "dsp": {"pitch": a.dsp.pitch, "formant": a.dsp.formant, "fx": a.dsp.fx},
+        }
+
     @app.get("/api/agents")
     async def list_agents(request: Request):
         registry: AgentRegistry = request.app.state.registry
         engines: EngineManager = request.app.state.engines
-        return {
-            "engine": engines.describe(),
-            "agents": [
-                {
-                    "id": a.id,
-                    "name": a.name,
-                    "nameEn": a.name_en,
-                    "role": a.role,
-                    "roleKo": a.role_ko,
-                    "color": a.color,
-                    "ready": a.model_ready,
-                    "engine": engines.engine_name(a),
-                    "dsp": {"pitch": a.dsp.pitch, "formant": a.dsp.formant, "fx": a.dsp.fx},
-                }
-                for a in registry.all()
-            ],
-        }
+        engines.refresh()
+        return {"engine": engines.describe(), "agents": [_agent_json(a, engines) for a in registry.all()]}
+
+    # ----- 모델 설치/제거 --------------------------------------------------------------
+
+    async def _save_upload(upload: UploadFile, dest: Path) -> None:
+        total = 0
+        with open(dest, "wb") as out:
+            while True:
+                block = await upload.read(1024 * 1024)
+                if not block:
+                    break
+                total += len(block)
+                if total > MAX_MODEL_BYTES:
+                    raise HTTPException(413, "모델 파일이 너무 큽니다 (최대 1GB)")
+                out.write(block)
+        if total == 0:
+            raise HTTPException(400, f"빈 파일입니다: {upload.filename}")
+
+    def _suffix_of(upload: UploadFile, allowed: tuple[str, ...], what: str) -> str:
+        suffix = Path(upload.filename or "").suffix.lower()
+        if suffix not in allowed:
+            raise HTTPException(400, f"{what} 은(는) {', '.join(allowed)} 파일이어야 합니다: {upload.filename}")
+        return suffix
+
+    @app.post("/api/models/{agent_id}")
+    async def upload_model(
+        request: Request,
+        agent_id: str,
+        model: UploadFile = File(..., description=".pth 또는 .zip"),
+        index: UploadFile | None = File(None, description=".index (선택)"),
+        force: bool = Form(False),
+    ):
+        registry: AgentRegistry = request.app.state.registry
+        engines: EngineManager = request.app.state.engines
+        target = registry.get(agent_id)
+        if target is None:
+            raise HTTPException(404, f"알 수 없는 요원: {agent_id}")
+        model_suffix = _suffix_of(model, CHECKPOINT_SUFFIXES + ARCHIVE_SUFFIXES, "모델")
+        index_suffix = _suffix_of(index, INDEX_SUFFIXES, "index") if index is not None and index.filename else None
+        tmp = Path(tempfile.mkdtemp(prefix="agent-voice-upload-"))
+        try:
+            model_path = tmp / f"upload{model_suffix}"
+            await _save_upload(model, model_path)
+            index_path: Path | None = None
+            if index is not None and index_suffix:
+                index_path = tmp / f"upload{index_suffix}"
+                await _save_upload(index, index_path)
+            try:
+                result = await asyncio.to_thread(install_model, target, model_path, index_path, force=force)
+            except ModelError as exc:
+                raise HTTPException(400, str(exc)) from exc
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+        engines.evict(target.id)
+        engines.refresh()
+        log.info("모델 설치: %s ← %s", target.id, model.filename)
+        return {"agent": _agent_json(target, engines), "install": result.as_dict(), "engine": engines.describe()}
+
+    @app.delete("/api/models/{agent_id}")
+    async def delete_model(request: Request, agent_id: str):
+        registry: AgentRegistry = request.app.state.registry
+        engines: EngineManager = request.app.state.engines
+        target = registry.get(agent_id)
+        if target is None:
+            raise HTTPException(404, f"알 수 없는 요원: {agent_id}")
+        engines.evict(target.id)
+        removed = await asyncio.to_thread(remove_model, target)
+        return {"agent": _agent_json(target, engines), "removed": removed}
 
     @app.post("/api/convert")
     async def convert(

@@ -6,6 +6,7 @@ import { VoiceStream } from './audio/stream';
 import { concatFloat32, encodeWav } from './audio/wav';
 import AgentGrid from './components/AgentGrid';
 import LevelMeter from './components/LevelMeter';
+import ModelManager from './components/ModelManager';
 import type { Agent, EngineInfo, StreamStats } from './types';
 
 type Mode = 'live' | 'clip';
@@ -87,16 +88,22 @@ export default function App() {
 
   // ----- 초기 로드 ---------------------------------------------------------------------
 
-  useEffect(() => {
-    fetchAgents()
-      .then((res) => {
-        setAgents(res.agents);
-        setEngine(res.engine);
-        setSelectedId((cur) => (cur && res.agents.some((a) => a.id === cur) ? cur : (res.agents[0]?.id ?? null)));
-      })
-      .catch((e: Error) => setLoadError(e.message));
-    void refreshDevices();
+  const reloadAgents = useCallback(async () => {
+    try {
+      const res = await fetchAgents();
+      setAgents(res.agents);
+      setEngine(res.engine);
+      setLoadError(null);
+      setSelectedId((cur) => (cur && res.agents.some((a) => a.id === cur) ? cur : (res.agents[0]?.id ?? null)));
+    } catch (e) {
+      setLoadError((e as Error).message);
+    }
   }, []);
+
+  useEffect(() => {
+    void reloadAgents();
+    void refreshDevices();
+  }, [reloadAgents]);
 
   useEffect(() => {
     const data: Persisted = { agentId: selectedId ?? undefined, inputId, outputId, pitch, chunkMs, gateDb, noiseSuppression, monitor };
@@ -327,6 +334,7 @@ export default function App() {
             )}
           </div>
           <AgentGrid agents={agents} selectedId={selectedId} onSelect={(a) => setSelectedId(a.id)} />
+          {selected && <ModelManager agent={selected} engine={engine} disabled={live.running || live.connecting} onChanged={() => void reloadAgents()} />}
         </section>
 
         <aside className="panel controls-panel">

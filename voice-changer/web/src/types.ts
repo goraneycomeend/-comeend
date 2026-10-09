@@ -9,9 +9,29 @@ export interface Agent {
   color: string;
   /** RVC 모델 파일이 준비돼 있는지 */
   ready: boolean;
+  /** .index 파일도 있는지 */
+  hasIndex: boolean;
   /** 이 요원에 실제로 쓰일 엔진 */
   engine: 'rvc' | 'dsp';
   dsp: { pitch: number; formant: number; fx: string | null };
+}
+
+export interface ScanInfo {
+  format: string;
+  is_rvc: boolean;
+  sample_rate: string | null;
+  version: string | null;
+  f0: boolean | null;
+  info: string | null;
+  weights: number;
+  size_bytes: number;
+  warnings: string[];
+}
+
+export interface InstallResponse {
+  agent: Agent;
+  install: { agent: string; modelPath: string; indexPath: string | null; scan: ScanInfo };
+  engine: EngineInfo;
 }
 
 export interface EngineInfo {

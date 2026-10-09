@@ -1,9 +1,56 @@
-import type { AgentsResponse } from './types';
+import type { Agent, AgentsResponse, InstallResponse } from './types';
 
 export async function fetchAgents(): Promise<AgentsResponse> {
   const res = await fetch('/api/agents');
   if (!res.ok) throw new Error(`서버 응답 오류 (${res.status})`);
   return (await res.json()) as AgentsResponse;
+}
+
+/** 모델(.pth/.zip) 과 선택적 .index 를 업로드해 설치한다. XHR 을 써서 업로드 진행률을 받는다. */
+export function uploadModel(
+  agentId: string,
+  model: File,
+  index: File | null,
+  force: boolean,
+  onProgress: (fraction: number) => void,
+): Promise<InstallResponse> {
+  return new Promise((resolve, reject) => {
+    const form = new FormData();
+    form.append('model', model, model.name);
+    if (index) form.append('index', index, index.name);
+    form.append('force', force ? 'true' : 'false');
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `/api/models/${encodeURIComponent(agentId)}`);
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress(e.loaded / e.total);
+    };
+    xhr.onerror = () => reject(new Error('업로드 중 연결이 끊어졌습니다'));
+    xhr.onload = () => {
+      let body: unknown = null;
+      try {
+        body = JSON.parse(xhr.responseText);
+      } catch {
+        /* 비 JSON 응답 */
+      }
+      if (xhr.status >= 200 && xhr.status < 300) resolve(body as InstallResponse);
+      else reject(new Error((body as { detail?: string } | null)?.detail ?? `설치 실패 (${xhr.status})`));
+    };
+    xhr.send(form);
+  });
+}
+
+export async function deleteModel(agentId: string): Promise<Agent> {
+  const res = await fetch(`/api/models/${encodeURIComponent(agentId)}`, { method: 'DELETE' });
+  if (!res.ok) {
+    let detail = `삭제 실패 (${res.status})`;
+    try {
+      detail = ((await res.json()) as { detail?: string }).detail ?? detail;
+    } catch {
+      /* 본문 없음 */
+    }
+    throw new Error(detail);
+  }
+  return ((await res.json()) as { agent: Agent }).agent;
 }
 
 export async function convertClip(wav: Blob, agent: string, pitch: number): Promise<{ blob: Blob; engine: string }> {

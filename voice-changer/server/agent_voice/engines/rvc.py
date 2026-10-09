@@ -97,6 +97,16 @@ class RvcEngine:
     def describe(self) -> dict:
         return {"name": self.name, "device": self.device, "label": f"RVC ({self.device})"}
 
+    def evict(self, agent_id: str) -> None:
+        with self._lock:
+            inst = self._instances.pop(agent_id, None)
+        if inst is not None:
+            log.info("RVC 모델 해제: %s", agent_id)
+            try:
+                inst.unload_model()
+            except Exception:  # noqa: BLE001
+                pass
+
     # ----- 내부 ----------------------------------------------------------------------
 
     def _get_instance(self, agent: Agent):
