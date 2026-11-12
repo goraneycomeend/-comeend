@@ -65,7 +65,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: tongyeok-build-${{ github.run_number }}
-          name: 중국앱 통역노트 빌드 #${{ github.run_number }}
+          name: "중국앱 통역노트 빌드 #${{ github.run_number }}"
           body: |
             폰에서 아래 `.apk` 파일을 눌러 다운로드한 뒤 설치하세요.
             브랜치: `${{ github.ref_name }}` · 커밋: `${{ github.sha }}`
