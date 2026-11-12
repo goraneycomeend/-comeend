@@ -343,6 +343,7 @@ public class MainActivity extends Activity {
                         .put("overlay", Settings.canDrawOverlays(MainActivity.this))
                         .put("running", ScreenTranslateService.isRunning())
                         .put("ai", prefs().getBoolean(ScreenTranslateService.KEY_AUTO_AI, false))
+                        .put("fast", prefs().getBoolean(ScreenTranslateService.KEY_FAST_MODEL, false))
                         .toString();
             } catch (Exception e) {
                 return "{}";
@@ -352,6 +353,11 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public void setAutoAi(boolean on) {
             prefs().edit().putBoolean(ScreenTranslateService.KEY_AUTO_AI, on).apply();
+        }
+
+        @JavascriptInterface
+        public void setFastModel(boolean fast) {
+            prefs().edit().putBoolean(ScreenTranslateService.KEY_FAST_MODEL, fast).apply();
         }
 
         @JavascriptInterface

@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 final class Glossary {
     private static final Pattern ROW = Pattern.compile(
             "\\[\"([a-z]+)\",\"[^\"]*\",\"([^\"]+)\",\"[^\"]*\",\"([^\"]+)\"");
+    private static final Pattern EDGES = Pattern.compile("^([^\\u3400-\\u9fff]*)([\\u3400-\\u9fff]+)([^\\u3400-\\u9fff]*)$");
     private static Glossary instance;
 
     private final Map<String, String> map = new HashMap<>();
@@ -49,7 +50,14 @@ final class Glossary {
         if (v != null) return v;
         // 끝의 문장부호·화살표 정도는 무시
         String stripped = k.replaceAll("[\\s>›»。！!？?：:，,]+$", "");
-        return stripped.equals(k) ? null : map.get(stripped);
+        if (!stripped.equals(k) && (v = map.get(stripped)) != null) return v;
+        // 앞뒤의 숫자·금액·기호는 그대로 두고 가운데 용어만 번역 (예: 配送费¥3 → 배달비 ¥3)
+        Matcher m = EDGES.matcher(k);
+        if (m.matches() && (v = map.get(m.group(2))) != null) {
+            return (m.group(1).isEmpty() ? "" : m.group(1).trim() + " ") + v
+                    + (m.group(3).isEmpty() ? "" : " " + m.group(3).trim());
+        }
+        return null;
     }
 
     int size() { return map.size(); }

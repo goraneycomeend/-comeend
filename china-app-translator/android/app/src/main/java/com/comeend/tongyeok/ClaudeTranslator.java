@@ -27,6 +27,8 @@ import java.util.List;
 /** Claude 호출만 담당하는 순수 Java 클래스 (Android 의존성 없음). 백그라운드 스레드에서 호출할 것. */
 public final class ClaudeTranslator {
     public static final String MODEL = "claude-opus-5-5";
+    /** 자동 번역 라벨용 "빠르게" 선택지 */
+    public static final String FAST_MODEL = "claude-haiku-5-5";
 
     /** 화면에 그대로 보여줄 한국어 메시지를 담은 예외. */
     public static final class UserFacingException extends Exception {
@@ -47,16 +49,25 @@ public final class ClaudeTranslator {
      * 화면에 보이는 짧은 중국어 문구들을 한 번에 번역한다. 결과는 입력과 같은 순서·같은 개수.
      * 못 받은 항목은 null.
      */
-    public List<String> translateBatch(List<String> items) throws UserFacingException {
+    public List<String> translateBatch(List<String> items, List<String> screen, boolean fast) throws UserFacingException {
         JSONArray in = new JSONArray();
         for (String it : items) in.put(it);
-        String prompt = "중국 여행 중인 한국인이 보고 있는 중국 앱 화면의 글자들이야. 각 항목을 한국어로 짧게 번역해.\n"
-                + "- 버튼·메뉴는 2~8자 정도의 자연스러운 한국어로 (예: 提交订单 → 주문 제출)\n"
-                + "- 금액, 숫자, 영문, 이모지는 그대로 두기\n"
-                + "- 고유명사(가게·지명)는 한국어 발음 표기 뒤에 괄호로 뜻 (예: 外滩 → 와이탄(번드))\n"
-                + "- 설명 없이 JSON 만 출력: {\"t\":[번역1, 번역2, ...]} 입력과 같은 개수, 같은 순서\n\n"
-                + "입력:\n" + in.toString();
-        String text = request(prompt, null, true, 4000L);
+        StringBuilder ctx = new StringBuilder();
+        for (String line : screen) {
+            if (ctx.length() > 3000) break;
+            ctx.append(line).append('\n');
+        }
+        String prompt = "중국 여행 중인 한국인이 보고 있는 중국 앱 화면이야. 화면 글자는 OCR 로 읽어서 가끔 틀린 글자가 섞여 있어.\n\n"
+                + "<화면 전체 글자(위→아래)>\n" + ctx + "</화면 전체 글자>\n\n"
+                + "위 화면 맥락을 참고해서, 아래 '번역할 항목'만 한국어로 옮겨.\n"
+                + "- 이 화면이 어떤 앱의 어떤 화면인지 맥락에 맞는 뜻으로 (예: 배달 앱의 起送 → 최소주문)\n"
+                + "- 버튼·메뉴·탭은 짧게 2~8자 (예: 提交订单 → 주문 제출, 去结算 → 결제하기)\n"
+                + "- OCR 오타로 보이면 맥락상 맞는 말로 고쳐서 번역\n"
+                + "- 금액·숫자·영문은 그대로, 가게·지명 고유명사는 한국어 발음(뜻)\n"
+                + "- 의미 없는 조각이면 빈 문자열\n"
+                + "- 설명 없이 JSON 만: {\"t\":[번역1, 번역2, ...]} 항목과 같은 개수·순서\n\n"
+                + "번역할 항목:\n" + in.toString();
+        String text = request(prompt, null, true, 4000L, fast ? FAST_MODEL : MODEL);
         List<String> out = new ArrayList<>();
         try {
             int a = text.indexOf('{'), b = text.lastIndexOf('}');
@@ -76,10 +87,10 @@ public final class ClaudeTranslator {
      * @param quick      짧은 문구 번역이면 true (낮은 effort)
      */
     public String ask(String prompt, String jpegBase64, boolean quick) throws UserFacingException {
-        return request(prompt, jpegBase64, quick, 16000L);
+        return request(prompt, jpegBase64, quick, 16000L, MODEL);
     }
 
-    private String request(String prompt, String jpegBase64, boolean quick, long maxTokens) throws UserFacingException {
+    private String request(String prompt, String jpegBase64, boolean quick, long maxTokens, String model) throws UserFacingException {
         List<BetaContentBlockParam> blocks = new ArrayList<>();
         if (jpegBase64 != null && !jpegBase64.isEmpty()) {
             blocks.add(BetaContentBlockParam.ofImage(BetaImageBlockParam.builder()
@@ -91,16 +102,18 @@ public final class ClaudeTranslator {
         }
         blocks.add(BetaContentBlockParam.ofText(BetaTextBlockParam.builder().text(prompt).build()));
 
-        MessageCreateParams params = MessageCreateParams.builder()
-                .model(MODEL)
+        MessageCreateParams.Builder builder = MessageCreateParams.builder()
+                .model(model)
                 .maxTokens(maxTokens)
-                .addBeta("server-side-fallback-2026-07-01")
-                .fallbacksDefault()
                 .outputConfig(BetaOutputConfig.builder()
                         .effort(quick ? BetaOutputConfig.Effort.LOW : BetaOutputConfig.Effort.MEDIUM)
                         .build())
-                .addUserMessageOfContentBlockParams(blocks)
-                .build();
+                .addUserMessageOfContentBlockParams(blocks);
+        if (MODEL.equals(model)) {
+            // Opus 거절 시 서버가 다른 모델로 이어서 답하게 함 (Haiku 는 미지원)
+            builder.addBeta("server-side-fallback-2026-07-01").fallbacksDefault();
+        }
+        MessageCreateParams params = builder.build();
 
         BetaMessage message;
         try {

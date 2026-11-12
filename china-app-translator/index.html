@@ -162,6 +162,11 @@ label.f { display: flex; flex-direction: column; gap: 6px; font-size: 13px; colo
 .check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; cursor: pointer }
 .check input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--accent); flex: 0 0 auto }
 .check small { color: var(--muted); font-size: 12px; line-height: 1.5 }
+.model { border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px 10px; margin: 0; display: flex; flex-direction: column; gap: 8px; font-size: 14px }
+.model legend { font-size: 12px; color: var(--muted); padding: 0 4px }
+.model label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer }
+.model input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--accent); flex: 0 0 auto }
+.model small { color: var(--muted); font-size: 12px }
 .footer-note { font-size: 12px; color: var(--muted); text-align: center; margin-top: 8px }
 @media (prefers-reduced-motion: no-preference) { .tab, .chip, .btn { transition: background .15s, color .15s } }
 </style>
@@ -200,6 +205,11 @@ label.f { display: flex; flex-direction: column; gap: 6px; font-size: 13px; colo
         <input type="checkbox" id="auto-ai">
         <span>용어집에 없는 글자도 AI로 번역<br><small>글자 읽기(OCR)는 휴대폰 안에서만 해요. 이걸 켜면 용어집에 없는 중국어 문구(위챗 대화 포함)를 번역하려고 Anthropic(Claude)으로 보내고 API 요금이 나가요. 한 번 번역한 문구는 기억해서 다시 보내지 않아요.</small></span>
       </label>
+      <fieldset class="model" id="auto-model">
+        <legend>AI 번역 모델</legend>
+        <label for="m-fast"><input type="radio" name="model" id="m-fast" value="fast"> <span><b>빠르게</b> · Claude Haiku 5.5<br><small>보통 1~3초, 요금이 훨씬 저렴. 메뉴·버튼 번역엔 충분해요</small></span></label>
+        <label for="m-acc"><input type="radio" name="model" id="m-acc" value="acc"> <span><b>정확하게</b> · Claude Opus 5.5<br><small>보통 5~15초, 문장이나 애매한 표현을 더 잘 옮겨요</small></span></label>
+      </fieldset>
       <p class="count" id="auto-ai-hint" hidden>AI 번역을 쓰려면 아래에 Claude API 키를 먼저 저장해 주세요.</p>
     </div>
 
@@ -894,12 +904,15 @@ function renderAuto() {
   $("#auto-start").hidden = !!st.running;
   $("#auto-stop").hidden = !st.running;
   $("#auto-ai").checked = !!st.ai;
+  $("#auto-model").hidden = !st.ai;
+  $(st.fast ? "#m-fast" : "#m-acc").checked = true;
   $("#auto-ai-hint").hidden = !(st.ai && !hasKey());
 }
 window.__autoRefresh = () => { renderAuto(); renderKey() };
 $("#auto-overlay").onclick = () => { try { NATIVE.openOverlaySettings() } catch {} };
 $("#auto-start").onclick = () => { try { NATIVE.startAuto() } catch {} };
 $("#auto-stop").onclick = () => { try { NATIVE.stopAuto() } catch {} };
+document.querySelectorAll('input[name="model"]').forEach(r => r.onchange = () => { try { NATIVE.setFastModel($("#m-fast").checked) } catch {} });
 $("#auto-ai").onchange = (e) => { try { NATIVE.setAutoAi(e.target.checked) } catch {} renderAuto() };
 document.addEventListener("visibilitychange", () => { if (!document.hidden && NATIVE) window.__autoRefresh() });
 

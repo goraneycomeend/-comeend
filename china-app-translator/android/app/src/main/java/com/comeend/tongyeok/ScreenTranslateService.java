@@ -67,6 +67,7 @@ public class ScreenTranslateService extends Service {
     static final String KEY_API = "anthropic_api_key";
     static final String KEY_AUTO_AI = "auto_ai";
     static final String KEY_BUBBLE_Y = "bubble_y";
+    static final String KEY_FAST_MODEL = "fast_model";
     static final String EXTRA_RESULT_CODE = "resultCode";
     static final String EXTRA_DATA = "data";
     static final String ACTION_STOP = "com.comeend.tongyeok.STOP";
@@ -75,8 +76,9 @@ public class ScreenTranslateService extends Service {
     private static final int NOTIFICATION_ID = 7;
     private static final Pattern HAN = Pattern.compile("[\\u3400-\\u9fff]");
     private static final int MAX_TEXT = 60;
-    private static final int MAX_BATCH = 40;
-    private static final long TICK_MS = 900;
+    private static final int MAX_BATCH = 15;       // 작게 나눠 먼저 끝난 것부터 보여줌
+    private static final int MAX_PARALLEL = 3;
+    private static final long TICK_MS = 500;
     private static final double CHANGE = 7.0;   // 화면이 바뀌었다고 볼 평균 밝기 차이 (0~255)
     private static final double STILL = 3.0;    // 멈췄다고 볼 차이
 
@@ -115,7 +117,7 @@ public class ScreenTranslateService extends Service {
     // 메인 스레드에서만 쓰는 상태
     private List<Item> shown = new ArrayList<>();
     private final Set<String> pending = new HashSet<>();
-    private boolean requestInFlight;
+    private int inFlight;
     private long aiBlockedUntil;
     private ClaudeTranslator translator;
     private String translatorKey;
@@ -124,6 +126,7 @@ public class ScreenTranslateService extends Service {
         final String zh;
         final Rect bounds;
         String ko;
+        boolean waiting;   // AI 번역 기다리는 중 → "…" 표시
         Item(String zh, Rect bounds) { this.zh = zh; this.bounds = bounds; }
     }
 
@@ -257,7 +260,7 @@ public class ScreenTranslateService extends Service {
             } catch (Exception ignored) {
                 // 한 번 실패해도 계속
             }
-            if (!stopped) capture.postDelayed(this, state == State.SETTLING ? 350 : TICK_MS);
+            if (!stopped) capture.postDelayed(this, state == State.SETTLING ? 220 : TICK_MS);
         }
     };
 
@@ -285,7 +288,7 @@ public class ScreenTranslateService extends Service {
         settleTicks++;
         boolean still = lastSig != null && diff(sig, lastSig) < STILL;
         lastSig = sig;
-        if (!still && settleTicks < 8) { frame.recycle(); return; }
+        if (!still && settleTicks < 6) { frame.recycle(); return; }
 
         List<Item> items = recognize(frame);
         frame.recycle();
@@ -343,15 +346,45 @@ public class ScreenTranslateService extends Service {
         try {
             Text text = Tasks.await(recognizer.process(InputImage.fromBitmap(frame, 0)));
             for (Text.TextBlock block : text.getTextBlocks()) {
-                for (Text.Line line : block.getLines()) {
-                    String t = line.getText().trim();
-                    Rect r = line.getBoundingBox();
-                    if (r == null || t.length() > MAX_TEXT || !HAN.matcher(t).find()) continue;
-                    out.add(new Item(t, r));
-                }
+                for (Text.Line line : block.getLines()) splitLine(line, out);
             }
         } catch (Exception ignored) { }
+        // 위→아래, 왼→오른 순서 (번역 맥락과 우선순위에 사용)
+        int row = Math.max(1, dp(14));   // 같은 줄로 볼 높이 단위
+        out.sort((x, y) -> {
+            int c = Integer.compare(x.bounds.centerY() / row, y.bounds.centerY() / row);
+            return c != 0 ? c : Integer.compare(x.bounds.left, y.bounds.left);
+        });
         return out;
+    }
+
+    /**
+     * OCR 은 같은 줄의 탭·버튼(外卖  美食  酒店)을 한 줄로 합치므로,
+     * 글자 덩어리 사이 간격이 줄 높이보다 크면 따로 나눈다.
+     */
+    private void splitLine(Text.Line line, List<Item> out) {
+        List<Text.Element> els = line.getElements();
+        StringBuilder sb = new StringBuilder();
+        Rect cur = null;
+        for (Text.Element el : els) {
+            Rect r = el.getBoundingBox();
+            if (r == null) continue;
+            if (cur != null && r.left - cur.right > Math.max(cur.height(), r.height()) * 0.9f) {
+                addItem(sb.toString(), cur, out);
+                sb.setLength(0);
+                cur = null;
+            }
+            if (cur == null) cur = new Rect(r); else cur.union(r);
+            sb.append(el.getText());
+        }
+        if (cur != null) addItem(sb.toString(), cur, out);
+        else if (line.getBoundingBox() != null) addItem(line.getText(), line.getBoundingBox(), out);
+    }
+
+    private static void addItem(String t, Rect r, List<Item> out) {
+        t = t.trim();
+        if (t.isEmpty() || t.length() > MAX_TEXT || !HAN.matcher(t).find()) return;
+        out.add(new Item(t, r));
     }
 
     private void checkRotation() {
@@ -384,26 +417,34 @@ public class ScreenTranslateService extends Service {
         for (Item it : items) {
             it.ko = glossary.lookup(it.zh);
             if (it.ko == null) it.ko = cache.get(it.zh);
-            if (it.ko == null && aiOn && !pending.contains(it.zh)) unknown.add(it.zh);
+            it.waiting = it.ko == null && aiOn;
+            if (it.waiting && !pending.contains(it.zh)) unknown.add(it.zh);
         }
         shown = items;
         setLabels(items);
-        if (!unknown.isEmpty()) requestTranslations(new ArrayList<>(unknown));
+        if (unknown.isEmpty()) return;
+        List<String> screen = new ArrayList<>();
+        for (Item it : items) screen.add(it.zh);
+        List<String> list = new ArrayList<>(unknown);
+        for (int i = 0; i < list.size() && inFlight < MAX_PARALLEL; i += MAX_BATCH) {
+            requestTranslations(list.subList(i, Math.min(i + MAX_BATCH, list.size())), screen);
+        }
     }
 
-    private void requestTranslations(List<String> texts) {
-        if (requestInFlight || System.currentTimeMillis() < aiBlockedUntil) return;
+    private void requestTranslations(List<String> texts, List<String> screen) {
+        if (System.currentTimeMillis() < aiBlockedUntil) return;
         String key = apiKey();
         if (key.isEmpty()) return;
-        List<String> batch = new ArrayList<>(texts.subList(0, Math.min(MAX_BATCH, texts.size())));
+        boolean fast = prefs().getBoolean(KEY_FAST_MODEL, false);
+        List<String> batch = new ArrayList<>(texts);
         pending.addAll(batch);
-        requestInFlight = true;
+        inFlight++;
         updateBubble();
         io.execute(() -> {
             List<String> result = null;
             String error = null;
             try {
-                result = translatorFor(key).translateBatch(batch);
+                result = translatorFor(key).translateBatch(batch, screen, fast);
             } catch (ClaudeTranslator.UserFacingException e) {
                 error = e.getMessage();
             } catch (Exception e) {
@@ -412,23 +453,26 @@ public class ScreenTranslateService extends Service {
             List<String> r = result;
             String err = error;
             main.post(() -> {
-                requestInFlight = false;
+                inFlight--;
                 pending.removeAll(batch);
                 if (r != null) {
                     for (int i = 0; i < batch.size(); i++) {
                         String ko = r.get(i);
-                        if (ko != null && !ko.isEmpty()) cache.put(batch.get(i), ko);
+                        cache.put(batch.get(i), ko == null ? "" : ko);   // 빈 값도 기억해 다시 보내지 않음
                     }
                     if (!io.isShutdown()) cache.saveLater(io);
-                    // 지금 보이는 라벨에 바로 반영
-                    for (Item it : shown) if (it.ko == null) it.ko = cache.get(it.zh);
-                    if (state == State.SHOWING) {
-                        setLabels(shown);
-                        capture.post(() -> baseline = null);   // 라벨이 늘어난 화면을 새 기준으로
-                    }
                 } else {
                     aiBlockedUntil = System.currentTimeMillis() + 30_000;
                     Toast.makeText(this, err, Toast.LENGTH_LONG).show();
+                }
+                // 지금 보이는 라벨에 바로 반영
+                for (Item it : shown) {
+                    if (it.ko == null) it.ko = cache.get(it.zh);
+                    if (it.ko != null || r == null) it.waiting = false;
+                }
+                if (state == State.SHOWING) {
+                    setLabels(shown);
+                    capture.post(() -> baseline = null);   // 라벨이 바뀐 화면을 새 기준으로
                 }
                 updateBubble();
             });
@@ -484,7 +528,7 @@ public class ScreenTranslateService extends Service {
     private void setLabels(List<Item> items) {
         if (labels == null) return;
         List<Item> visible = new ArrayList<>();
-        for (Item it : items) if (it.ko != null) visible.add(it);
+        for (Item it : items) if ((it.ko != null && !it.ko.isEmpty()) || it.waiting) visible.add(it);
         labels.setItems(visible);
     }
 
@@ -512,7 +556,7 @@ public class ScreenTranslateService extends Service {
     private void updateBubble() {
         if (bubble == null) return;
         boolean on = state != State.OFF;
-        ((GradientDrawable) bubble.getBackground()).setColor(on ? (requestInFlight ? 0xF0B8322A : 0xF00D6B5F) : 0xC0606A68);
+        ((GradientDrawable) bubble.getBackground()).setColor(on ? (inFlight > 0 ? 0xF0B8322A : 0xF00D6B5F) : 0xC0606A68);
         bubble.setText(on ? "译" : "中");
         bubble.setContentDescription(on ? "자동 번역 끄기" : "자동 번역 켜기");
     }
@@ -561,6 +605,7 @@ public class ScreenTranslateService extends Service {
     private final class LabelsView extends View {
         private List<Item> items = new ArrayList<>();
         private final Paint bg = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint dim = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final TextPaint fg = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         private final int[] origin = new int[2];
         private final RectF box = new RectF();
@@ -568,6 +613,7 @@ public class ScreenTranslateService extends Service {
         LabelsView(Context c) {
             super(c);
             bg.setColor(0xF20D6B5F);
+            dim.setColor(0xB0606A68);
             fg.setColor(Color.WHITE);
             fg.setFakeBoldText(true);
         }
@@ -580,22 +626,28 @@ public class ScreenTranslateService extends Service {
         @Override
         protected void onDraw(Canvas canvas) {
             getLocationOnScreen(origin);
-            float minSize = sp(9), maxSize = sp(15), pad = dp(3);
+            float minSize = sp(8), maxSize = sp(16), pad = dp(3);
             for (Item it : items) {
                 float left = it.bounds.left - origin[0];
                 float top = it.bounds.top - origin[1];
                 float h = it.bounds.height();
-                float size = Math.max(minSize, Math.min(maxSize, h * 0.7f));
-                fg.setTextSize(size);
-                float maxW = Math.max(it.bounds.width(), dp(120));
-                maxW = Math.min(maxW, getWidth() - left - pad);
-                if (maxW <= pad * 2) continue;
-                String text = TextUtils.ellipsize(it.ko, fg, maxW - pad * 2, TextUtils.TruncateAt.END).toString();
-                float w = Math.max(fg.measureText(text) + pad * 2, it.bounds.width());
-                float boxH = Math.max(size + pad * 2, h);
                 float cy = top + h / 2f;
+                boolean waiting = it.ko == null || it.ko.isEmpty();
+                String label = waiting ? "…" : it.ko;
+                // 원래 글자 폭의 1.6배(최소 80dp)까지 넓히고, 그래도 넘치면 글자를 줄임
+                float maxW = Math.min(Math.max(it.bounds.width() * 1.6f, dp(80)), getWidth() - left - pad);
+                if (maxW <= pad * 2) continue;
+                float size = Math.max(minSize, Math.min(maxSize, h * 0.78f));
+                fg.setTextSize(size);
+                while (size > minSize && fg.measureText(label) > maxW - pad * 2) {
+                    size -= sp(0.5f);
+                    fg.setTextSize(size);
+                }
+                String text = TextUtils.ellipsize(label, fg, maxW - pad * 2, TextUtils.TruncateAt.END).toString();
+                float w = Math.max(fg.measureText(text) + pad * 2, waiting ? dp(18) : it.bounds.width());
+                float boxH = Math.max(size + pad * 2, waiting ? size + pad * 2 : h);
                 box.set(left, cy - boxH / 2f, left + w, cy + boxH / 2f);
-                canvas.drawRoundRect(box, dp(4), dp(4), bg);
+                canvas.drawRoundRect(box, dp(4), dp(4), waiting ? dim : bg);
                 canvas.drawText(text, left + pad, cy + size * 0.36f, fg);
             }
         }
