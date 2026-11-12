@@ -1,0 +1,767 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body><title>중국앱 통역노트</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+SC:wght@500;700&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+/* Layout: phone-first single column, sticky top bar + bottom tab bar; hanzi set large in serif as the hero of every row */
+:root {
+  --bg: #f3f5f4;
+  --surface: #ffffff;
+  --ink: #17201f;
+  --muted: #5d6b69;
+  --line: #dde3e1;
+  --accent: #0d6b5f;      /* jade, Shanghai-teahouse green */
+  --accent-ink: #ffffff;
+  --accent-soft: #e0efec;
+  --seal: #b8322a;        /* stamp red, used only for hanzi highlights */
+  --warn-bg: #fff4dc;
+  --warn-ink: #7a5300;
+  --font-ko: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-zh: "Noto Serif SC", "Songti SC", "SimSun", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --wechat: #07a35a; --alipay: #1677ff; --meituan: #d9a400; --dianping: #f0642c; --didi: #ef7a1a; --amap: #2a6df4; --common: #6b7a78;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1514; --surface: #182120; --ink: #e6eeec; --muted: #93a3a0; --line: #2a3533;
+  --accent: #3fb6a3; --accent-ink: #06201c; --accent-soft: #173431; --seal: #ff7b6e;
+  --warn-bg: #3a2f14; --warn-ink: #f3d38a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1514; --surface: #182120; --ink: #e6eeec; --muted: #93a3a0; --line: #2a3533;
+  --accent: #3fb6a3; --accent-ink: #06201c; --accent-soft: #173431; --seal: #ff7b6e;
+  --warn-bg: #3a2f14; --warn-ink: #f3d38a; color-scheme: dark }
+
+* { box-sizing: border-box }
+[hidden] { display: none !important }
+html, body { height: 100%; margin: 0 }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-ko); font-size: 15px; line-height: 1.55 }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface) }
+.zh { font-family: var(--font-zh); }
+button, input, textarea { font: inherit; color: inherit }
+button { cursor: pointer }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+
+header.top {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: var(--surface); border-bottom: 1px solid var(--line);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px;
+}
+.top-inner { max-width: 720px; margin: 0 auto; display: flex; align-items: baseline; gap: 10px }
+.brand { font-weight: 700; font-size: 18px; letter-spacing: -0.01em }
+.brand .zh { color: var(--seal); font-size: 15px; margin-left: 4px }
+.top-sub { margin-left: auto; color: var(--muted); font-size: 12px }
+
+main {
+  max-width: 720px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 16px calc(88px + env(safe-area-inset-bottom, 0px));
+}
+section.view { display: flex; flex-direction: column; gap: 14px }
+h2 { font-size: 20px; margin: 0; text-wrap: balance }
+.lead { color: var(--muted); margin: 0; font-size: 14px }
+
+nav.tabs {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 6;
+  background: var(--surface); border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px);
+}
+.tabs-inner { max-width: 720px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr) }
+.tab { background: none; border: 0; padding: 8px 4px 10px; display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--muted); font-size: 12px }
+.tab svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round }
+.tab[aria-selected="true"] { color: var(--accent); font-weight: 700 }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 12px; min-width: 0 }
+.btn { border: 0; border-radius: 10px; padding: 11px 16px; background: var(--accent); color: var(--accent-ink); font-weight: 700 }
+.btn:disabled { opacity: .5; cursor: default }
+.btn.ghost { background: var(--accent-soft); color: var(--accent) }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap }
+.btn-row .btn { flex: 1 1 auto }
+
+.drop {
+  border: 2px dashed var(--line); border-radius: 12px; padding: 18px; text-align: center; color: var(--muted);
+  display: flex; flex-direction: column; align-items: center; gap: 8px; background: var(--bg);
+}
+.drop.has { padding: 8px }
+.drop img { max-height: 340px; border-radius: 8px; object-fit: contain }
+.drop strong { color: var(--ink) }
+input[type="text"], textarea {
+  width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--bg);
+}
+textarea { min-height: 96px; resize: vertical; font-family: var(--font-zh), var(--font-ko); font-size: 16px }
+label.f { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--muted) }
+
+.note { font-size: 13px; padding: 10px 12px; border-radius: 10px; background: var(--warn-bg); color: var(--warn-ink) }
+.result { min-width: 0; overflow-wrap: anywhere }
+.result h3 { font-size: 13px; letter-spacing: .06em; color: var(--accent); margin: 14px 0 6px; text-transform: uppercase }
+.result h3:first-child { margin-top: 0 }
+.result ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px }
+.result ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px }
+.result p { margin: 0 0 6px }
+.result b { color: var(--seal); font-family: var(--font-zh), var(--font-ko); font-weight: 700 }
+.tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .06em; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent) }
+.thinking { color: var(--muted) }
+
+.chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none }
+.chips::-webkit-scrollbar { display: none }
+.chip { flex: 0 0 auto; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 12px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap }
+.chip .dot { width: 8px; height: 8px; border-radius: 50% }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink) }
+.chip .zh { font-size: 12px; opacity: .75 }
+
+.search { position: relative }
+.search input { padding-left: 38px; font-size: 16px; background: var(--surface) }
+.search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; stroke: var(--muted); fill: none; stroke-width: 2 }
+
+.cat { font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--muted); margin: 6px 2px 0 }
+.list { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden }
+.term { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 12px 14px; border-top: 1px solid var(--line); align-items: center }
+.term:first-child { border-top: 0 }
+.term .h { font-family: var(--font-zh); font-size: 22px; font-weight: 700; line-height: 1.25; color: var(--ink) }
+.term .py { font-family: var(--font-mono); font-size: 12px; color: var(--muted) }
+.term .ko { font-weight: 500 }
+.term .tip { grid-column: 1 / -1; font-size: 13px; color: var(--muted) }
+.term .app { font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--muted); margin-left: 6px; font-weight: 400 }
+.term .app .dot { width: 6px; height: 6px; border-radius: 50% }
+.speak { grid-row: 1 / span 3; grid-column: 2; border: 1px solid var(--line); background: var(--bg); border-radius: 50%; width: 38px; height: 38px; display: grid; place-items: center; color: var(--muted) }
+.speak svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round }
+.empty { padding: 20px; text-align: center; color: var(--muted) }
+.count { font-size: 12px; color: var(--muted) }
+
+.found { display: flex; flex-wrap: wrap; gap: 6px }
+.found .fz { border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px; background: var(--bg); display: flex; flex-direction: column; min-width: 0 }
+.found .fz .zh { font-size: 17px; font-weight: 700; color: var(--seal) }
+.found .fz span:last-child { font-size: 13px }
+
+.phrase { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; padding: 14px; border-top: 1px solid var(--line); text-align: left; background: none; border-left: 0; border-right: 0; border-bottom: 0; width: 100%; align-items: center }
+.phrase:first-child { border-top: 0 }
+.phrase .zh { font-size: 19px; font-weight: 700; line-height: 1.35 }
+.phrase .ko { color: var(--muted); font-size: 13px }
+.phrase .show { grid-row: 1 / span 2; grid-column: 2; font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-soft); padding: 6px 10px; border-radius: 999px }
+
+.overlay {
+  position: fixed; inset: 0; z-index: 20; background: var(--surface);
+  display: flex; flex-direction: column; justify-content: center; gap: 18px;
+  padding: calc(24px + env(safe-area-inset-top, 0px)) max(24px, env(safe-area-inset-right, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) max(24px, env(safe-area-inset-left, 0px));
+}
+.overlay .big { font-family: var(--font-zh); font-weight: 700; font-size: clamp(34px, 10vw, 64px); line-height: 1.3; text-wrap: balance; overflow-wrap: anywhere }
+.overlay .py { font-family: var(--font-mono); color: var(--muted); font-size: 15px }
+.overlay .ko { font-size: 16px; color: var(--muted) }
+.overlay .btn-row { margin-top: 12px }
+.overlay .hint { font-size: 12px; color: var(--muted) }
+
+.footer-note { font-size: 12px; color: var(--muted); text-align: center; margin-top: 8px }
+@media (prefers-reduced-motion: no-preference) { .tab, .chip, .btn { transition: background .15s, color .15s } }
+</style>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">중국앱 통역노트<span class="zh">翻译</span></div>
+    <div class="top-sub">위챗 · 알리페이 · 메이퇀 · 디디</div>
+  </div>
+</header>
+
+<main>
+  <!-- 1. 화면 번역 -->
+  <section class="view" id="view-screen">
+    <div>
+      <h2>앱 화면 번역</h2>
+      <p class="lead">막힌 화면을 캡처해서 올리면 글자 뜻과 눌러야 할 버튼을 알려줘요.</p>
+    </div>
+
+    <div class="panel" id="ai-panel">
+      <label class="drop" id="drop" for="file">
+        <span id="drop-text"><strong>스크린샷 선택</strong><br>사진첩에서 캡처한 화면을 고르세요</span>
+        <img id="preview" alt="선택한 스크린샷" hidden>
+      </label>
+      <input type="file" id="file" accept="image/*" hidden>
+      <label class="f" for="goal">지금 하려는 일 (선택)
+        <input type="text" id="goal" placeholder="예: 배달 주문, 택시 부르기, 외국 카드 등록">
+      </label>
+      <div class="btn-row">
+        <button class="btn" id="go-img" disabled>화면 번역하기</button>
+        <button class="btn ghost" id="stop" hidden>중지</button>
+      </div>
+      <div class="note" id="ai-off" hidden>AI 번역은 claude.ai 에서 이 페이지를 열었을 때만 동작해요. 아래 용어집과 문장 카드는 오프라인에서도 쓸 수 있어요.</div>
+    </div>
+
+    <div class="panel">
+      <div class="result" id="out">
+        <span class="tag">예시 결과</span>
+        <h3>이 화면은</h3>
+        <p>메이퇀(美团) 배달 앱의 주문 확인 화면이에요. 결제 직전 단계입니다.</p>
+        <h3>화면 글자</h3>
+        <ul>
+          <li><b>收货地址</b> (shōuhuò dìzhǐ) → 배달 받을 주소</li>
+          <li><b>餐具份数</b> (cānjù fènshù) → 수저·포크 개수</li>
+          <li><b>无需餐具</b> (wúxū cānjù) → 수저 필요 없음</li>
+          <li><b>配送费 ¥3</b> (pèisòng fèi) → 배달비 3위안</li>
+          <li><b>备注</b> (bèizhù) → 요청사항</li>
+          <li><b>提交订单</b> (tíjiāo dìngdān) → 주문 제출</li>
+        </ul>
+        <h3>지금 할 일</h3>
+        <ol>
+          <li>위쪽 <b>收货地址</b>를 눌러 호텔 주소와 방 번호(门牌号)를 확인하세요.</li>
+          <li>필요하면 <b>备注</b>에 "不要辣"(안 맵게)를 적으세요.</li>
+          <li>오른쪽 아래 <b>提交订单</b>을 누르면 결제 화면으로 넘어가요.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="panel">
+      <label class="f" for="txt">복사한 중국어 글자 번역
+        <textarea id="txt" placeholder="앱에서 길게 눌러 복사한 문구를 붙여넣으세요">提交订单 满30减5 配送费</textarea>
+      </label>
+      <div class="found" id="found"></div>
+      <div class="btn-row">
+        <button class="btn" id="go-txt">AI로 번역</button>
+        <a class="btn ghost" id="papago" href="#" target="_blank" rel="noopener" style="text-align:center;text-decoration:none">파파고에서 열기</a>
+      </div>
+      <div class="result" id="out-txt" hidden></div>
+    </div>
+  </section>
+
+  <!-- 2. 용어집 -->
+  <section class="view" id="view-words" hidden>
+    <div>
+      <h2>앱별 용어집</h2>
+      <p class="lead">버튼·메뉴에 자주 나오는 말. 한국어, 중국어, 병음 어느 것으로든 찾을 수 있어요.</p>
+    </div>
+    <div class="search">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+      <input type="text" id="q" placeholder="예: 결제, 배달비, 付款, fukuan" autocomplete="off">
+    </div>
+    <div class="chips" id="apps"></div>
+    <div class="count" id="count"></div>
+    <div id="terms"></div>
+  </section>
+
+  <!-- 3. 보여주기 -->
+  <section class="view" id="view-phrases" hidden>
+    <div>
+      <h2>직원에게 보여주기</h2>
+      <p class="lead">문장을 누르면 화면 가득 크게 띄워요. 휴대폰을 돌려 상대에게 보여주세요.</p>
+    </div>
+    <div id="phrases"></div>
+    <p class="footer-note">용어집과 문장 카드는 인터넷 없이도 동작해요.</p>
+  </section>
+</main>
+
+<nav class="tabs" aria-label="메뉴">
+  <div class="tabs-inner" role="tablist">
+    <button class="tab" role="tab" data-v="screen" aria-selected="true">
+      <svg viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.5"></rect><path d="M10 6h4M9 12h6M9 15.5h4"></path></svg>화면 번역</button>
+    <button class="tab" role="tab" data-v="words" aria-selected="false">
+      <svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"></path><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"></path><path d="M9 8h7M9 11.5h5"></path></svg>용어집</button>
+    <button class="tab" role="tab" data-v="phrases" aria-selected="false">
+      <svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"></path><path d="M8 9h8M8 12h5"></path></svg>보여주기</button>
+  </div>
+</nav>
+
+<div class="overlay" id="overlay" hidden role="dialog" aria-modal="true" aria-label="크게 보기">
+  <div class="big" id="ov-zh"></div>
+  <div class="py" id="ov-py"></div>
+  <div class="ko" id="ov-ko"></div>
+  <div class="btn-row">
+    <button class="btn ghost" id="ov-speak">발음 듣기</button>
+    <button class="btn" id="ov-close">닫기</button>
+  </div>
+  <div class="hint">화면 아무 곳이나 두 번 누르면 닫혀요</div>
+</div>
+
+<script>
+const APPS = {
+  common:  { ko: "공통",     zh: "通用",     color: "var(--common)" },
+  wechat:  { ko: "위챗",     zh: "微信",     color: "var(--wechat)" },
+  alipay:  { ko: "알리페이", zh: "支付宝",   color: "var(--alipay)" },
+  meituan: { ko: "메이퇀",   zh: "美团",     color: "var(--meituan)" },
+  dianping:{ ko: "따종디엔핑", zh: "大众点评", color: "var(--dianping)" },
+  didi:    { ko: "디디",     zh: "滴滴出行", color: "var(--didi)" },
+  amap:    { ko: "가오더지도", zh: "高德地图", color: "var(--amap)" },
+};
+
+// [app, category, 中文, pinyin, 한국어, tip?]
+const T = [
+  // 공통
+  ["common","가입·인증","验证码","yànzhèngmǎ","인증번호","문자로 오는 6자리 숫자"],
+  ["common","가입·인증","获取验证码","huòqǔ yànzhèngmǎ","인증번호 받기"],
+  ["common","가입·인증","手机号","shǒujī hào","휴대폰 번호","국가번호 +86 을 눌러 +82 로 바꾸세요"],
+  ["common","가입·인증","国家和地区","guójiā hé dìqū","국가·지역","韩国(한국) 선택"],
+  ["common","가입·인증","韩国","Hánguó","한국"],
+  ["common","가입·인증","登录","dēnglù","로그인"],
+  ["common","가입·인증","注册","zhùcè","회원가입"],
+  ["common","가입·인증","实名认证","shímíng rènzhèng","실명 인증","외국인은 여권으로 인증"],
+  ["common","가입·인증","护照","hùzhào","여권"],
+  ["common","가입·인증","人脸识别","rénliǎn shíbié","얼굴 인식"],
+  ["common","가입·인증","同意并继续","tóngyì bìng jìxù","동의하고 계속"],
+  ["common","가입·인증","我已阅读并同意","wǒ yǐ yuèdú bìng tóngyì","읽었으며 동의합니다","약관 체크박스"],
+  ["common","가입·인증","允许","yǔnxǔ","허용","권한 팝업"],
+  ["common","기본 버튼","确定","quèdìng","확인"],
+  ["common","기본 버튼","确认","quèrèn","확인(확정)"],
+  ["common","기본 버튼","取消","qǔxiāo","취소"],
+  ["common","기본 버튼","下一步","xià yí bù","다음"],
+  ["common","기본 버튼","完成","wánchéng","완료"],
+  ["common","기본 버튼","返回","fǎnhuí","뒤로"],
+  ["common","기본 버튼","提交","tíjiāo","제출"],
+  ["common","기본 버튼","保存","bǎocún","저장"],
+  ["common","기본 버튼","删除","shānchú","삭제"],
+  ["common","기본 버튼","编辑","biānjí","편집"],
+  ["common","기본 버튼","搜索","sōusuǒ","검색"],
+  ["common","기본 버튼","设置","shèzhì","설정"],
+  ["common","기본 버튼","我知道了","wǒ zhīdào le","알겠어요","안내 팝업 닫기"],
+  ["common","기본 버튼","暂不","zàn bù","나중에"],
+  ["common","기본 버튼","跳过","tiàoguò","건너뛰기"],
+  ["common","기본 버튼","重试","chóngshì","다시 시도"],
+  ["common","결제","付款","fùkuǎn","결제하기(돈 내기)"],
+  ["common","결제","支付","zhīfù","결제"],
+  ["common","결제","立即支付","lìjí zhīfù","바로 결제"],
+  ["common","결제","确认付款","quèrèn fùkuǎn","결제 확인"],
+  ["common","결제","支付成功","zhīfù chénggōng","결제 성공"],
+  ["common","결제","支付失败","zhīfù shībài","결제 실패"],
+  ["common","결제","支付密码","zhīfù mìmǎ","결제 비밀번호","6자리 숫자"],
+  ["common","결제","付款码","fùkuǎn mǎ","결제 코드(내 QR)","가게가 이걸 스캔"],
+  ["common","결제","收款码","shōukuǎn mǎ","받기 코드(가게 QR)","내가 이걸 스캔"],
+  ["common","결제","扫一扫","sǎo yi sǎo","스캔","QR 찍기"],
+  ["common","결제","金额","jīn'é","금액"],
+  ["common","결제","元","yuán","위안","¥ 1위안 ≈ 190원 안팎"],
+  ["common","결제","手续费","shǒuxù fèi","수수료"],
+  ["common","결제","服务费","fúwù fèi","서비스 요금"],
+  ["common","결제","实付","shí fù","실제 결제 금액"],
+  ["common","결제","合计","héjì","합계"],
+  ["common","결제","退款","tuìkuǎn","환불"],
+  ["common","결제","发票","fāpiào","영수증(세금계산서)"],
+  ["common","결제","余额不足","yú'é bùzú","잔액 부족"],
+  ["common","결제","银行卡","yínháng kǎ","은행 카드"],
+  ["common","결제","添加银行卡","tiānjiā yínháng kǎ","카드 추가"],
+  ["common","결제","境外卡","jìngwài kǎ","해외 카드"],
+  ["common","주문","订单","dìngdān","주문(내역)"],
+  ["common","주문","全部订单","quánbù dìngdān","전체 주문"],
+  ["common","주문","待付款","dài fùkuǎn","결제 대기"],
+  ["common","주문","待使用","dài shǐyòng","사용 대기","구매한 쿠폰·티켓"],
+  ["common","주문","已完成","yǐ wánchéng","완료됨"],
+  ["common","주문","已取消","yǐ qǔxiāo","취소됨"],
+  ["common","주문","优惠券","yōuhuì quàn","할인 쿠폰"],
+  ["common","주문","客服","kèfù","고객센터"],
+  ["common","주문","联系客服","liánxì kèfù","고객센터 연결"],
+  ["common","주문","网络异常","wǎngluò yìcháng","네트워크 오류"],
+
+  // 위챗
+  ["wechat","하단 메뉴","微信","Wēixìn","채팅(첫 탭)"],
+  ["wechat","하단 메뉴","通讯录","tōngxùnlù","연락처"],
+  ["wechat","하단 메뉴","发现","fāxiàn","발견","모멘트·스캔·미니프로그램"],
+  ["wechat","하단 메뉴","我","wǒ","나","결제·설정은 여기"],
+  ["wechat","결제","服务","fúwù","서비스(결제 메뉴)","나 → 서비스. 예전 이름 支付"],
+  ["wechat","결제","收付款","shōu fùkuǎn","결제·송금","결제 QR 띄우기"],
+  ["wechat","결제","钱包","qiánbāo","지갑"],
+  ["wechat","결제","零钱","língqián","잔돈(잔액)"],
+  ["wechat","결제","绑定银行卡","bǎngdìng yínháng kǎ","카드 연결","한국 비자·마스터 등록 가능"],
+  ["wechat","결제","向商家付款","xiàng shāngjiā fùkuǎn","가게에 결제"],
+  ["wechat","결제","二维码收款","èrwéimǎ shōukuǎn","QR로 받기"],
+  ["wechat","결제","转账","zhuǎnzhàng","송금"],
+  ["wechat","결제","红包","hóngbāo","홍바오(세뱃돈 봉투)"],
+  ["wechat","결제","账单","zhàngdān","결제 내역"],
+  ["wechat","채팅","添加朋友","tiānjiā péngyou","친구 추가"],
+  ["wechat","채팅","发起群聊","fāqǐ qúnliáo","그룹 채팅 만들기"],
+  ["wechat","채팅","发送","fāsòng","보내기"],
+  ["wechat","채팅","翻译","fānyì","번역","메시지를 길게 눌러 선택"],
+  ["wechat","채팅","复制","fùzhì","복사"],
+  ["wechat","채팅","转发","zhuǎnfā","전달"],
+  ["wechat","채팅","撤回","chèhuí","보낸 메시지 취소"],
+  ["wechat","채팅","语音","yǔyīn","음성 메시지"],
+  ["wechat","채팅","转文字","zhuǎn wénzì","음성을 글자로"],
+  ["wechat","채팅","位置","wèizhì","위치 보내기"],
+  ["wechat","채팅","共享实时位置","gòngxiǎng shíshí wèizhì","실시간 위치 공유"],
+  ["wechat","채팅","视频通话","shìpín tōnghuà","영상통화"],
+  ["wechat","채팅","朋友圈","péngyouquān","모멘트(SNS)"],
+  ["wechat","채팅","小程序","xiǎo chéngxù","미니프로그램","앱 설치 없이 쓰는 앱"],
+  ["wechat","설정","通用","tōngyòng","일반","언어 변경 메뉴가 있는 곳"],
+  ["wechat","설정","多语言","duō yǔyán","언어","한국어 선택 가능"],
+  ["wechat","설정","退出登录","tuìchū dēnglù","로그아웃"],
+
+  // 알리페이
+  ["alipay","하단 메뉴","首页","shǒuyè","홈"],
+  ["alipay","하단 메뉴","理财","lǐcái","재테크"],
+  ["alipay","하단 메뉴","消息","xiāoxi","메시지"],
+  ["alipay","하단 메뉴","我的","wǒ de","내 정보"],
+  ["alipay","결제","收付款","shōu fùkuǎn","결제 코드 열기","홈 상단. 가게에 바코드 보여주기"],
+  ["alipay","결제","付款方式","fùkuǎn fāngshì","결제 수단"],
+  ["alipay","결제","优先使用此付款方式","yōuxiān shǐyòng cǐ fùkuǎn fāngshì","이 수단 우선 사용"],
+  ["alipay","결제","免密支付","miǎn mì zhīfù","비밀번호 없이 결제"],
+  ["alipay","결제","余额","yú'é","잔액"],
+  ["alipay","결제","卡包","kǎbāo","카드 지갑"],
+  ["alipay","결제","身份验证","shēnfèn yànzhèng","본인 확인"],
+  ["alipay","결제","交易记录","jiāoyì jìlù","거래 내역"],
+  ["alipay","교통·생활","出行","chūxíng","교통"],
+  ["alipay","교통·생활","乘车码","chéngchē mǎ","교통 QR","지하철·버스 탈 때 찍기"],
+  ["alipay","교통·생활","上海地铁","Shànghǎi dìtiě","상하이 지하철"],
+  ["alipay","교통·생활","打车","dǎchē","택시 호출"],
+  ["alipay","교통·생활","火车票","huǒchē piào","기차표"],
+  ["alipay","교통·생활","机票","jīpiào","항공권"],
+  ["alipay","교통·생활","酒店","jiǔdiàn","호텔"],
+  ["alipay","교통·생활","共享单车","gòngxiǎng dānchē","공유 자전거"],
+  ["alipay","교통·생활","充电宝","chōngdiàn bǎo","보조배터리 대여"],
+  ["alipay","교통·생활","归还","guīhuán","반납"],
+  ["alipay","교통·생활","押金","yājīn","보증금"],
+
+  // 메이퇀
+  ["meituan","메인","外卖","wàimài","배달"],
+  ["meituan","메인","美食","měishí","맛집"],
+  ["meituan","메인","团购","tuángòu","공동구매 쿠폰","가게에서 쓰는 할인권"],
+  ["meituan","메인","酒店民宿","jiǔdiàn mínsù","호텔·민박"],
+  ["meituan","메인","休闲玩乐","xiūxián wánlè","놀거리"],
+  ["meituan","메인","买药","mǎi yào","약 배달"],
+  ["meituan","메인","闪购","shǎngòu","편의점·마트 배달"],
+  ["meituan","가게 정보","月售","yuè shòu","월 판매량"],
+  ["meituan","가게 정보","起送","qǐ sòng","최소 주문 금액"],
+  ["meituan","가게 정보","配送费","pèisòng fèi","배달비"],
+  ["meituan","가게 정보","免配送费","miǎn pèisòng fèi","배달비 무료"],
+  ["meituan","가게 정보","打包费","dǎbāo fèi","포장비"],
+  ["meituan","가게 정보","满减","mǎn jiǎn","금액 할인","满30减5 = 30위안 이상 5위안 할인"],
+  ["meituan","가게 정보","人均","rénjūn","1인 평균"],
+  ["meituan","가게 정보","营业中","yíngyè zhōng","영업 중"],
+  ["meituan","가게 정보","休息中","xiūxi zhōng","영업 종료"],
+  ["meituan","가게 정보","招牌","zhāopái","대표 메뉴"],
+  ["meituan","가게 정보","套餐","tàocān","세트 메뉴"],
+  ["meituan","가게 정보","选规格","xuǎn guīgé","옵션 선택"],
+  ["meituan","주문","加入购物车","jiārù gòuwùchē","장바구니 담기"],
+  ["meituan","주문","去结算","qù jiésuàn","결제하러 가기"],
+  ["meituan","주문","提交订单","tíjiāo dìngdān","주문 제출"],
+  ["meituan","주문","收货地址","shōuhuò dìzhǐ","배달 주소"],
+  ["meituan","주문","新增地址","xīnzēng dìzhǐ","주소 추가"],
+  ["meituan","주문","门牌号","ménpái hào","상세 주소(동·호수)","호텔이면 방 번호"],
+  ["meituan","주문","联系人","liánxì rén","받는 사람"],
+  ["meituan","주문","备注","bèizhù","요청사항"],
+  ["meituan","주문","餐具份数","cānjù fènshù","수저 개수"],
+  ["meituan","주문","无需餐具","wúxū cānjù","수저 필요 없음"],
+  ["meituan","주문","不要辣","bú yào là","안 맵게"],
+  ["meituan","주문","微辣","wēi là","약간 맵게"],
+  ["meituan","주문","中辣","zhōng là","보통 맵게"],
+  ["meituan","주문","特辣","tè là","아주 맵게"],
+  ["meituan","주문","到店自取","dào diàn zìqǔ","매장 픽업"],
+  ["meituan","배달 상태","商家已接单","shāngjiā yǐ jiē dān","가게가 주문 접수"],
+  ["meituan","배달 상태","骑手","qíshǒu","배달 기사"],
+  ["meituan","배달 상태","骑手已取餐","qíshǒu yǐ qǔ cān","기사가 음식 픽업"],
+  ["meituan","배달 상태","预计送达","yùjì sòngdá","도착 예정"],
+  ["meituan","배달 상태","已送达","yǐ sòngdá","배달 완료"],
+  ["meituan","배달 상태","联系骑手","liánxì qíshǒu","기사에게 연락"],
+  ["meituan","배달 상태","联系商家","liánxì shāngjiā","가게에 연락"],
+  ["meituan","배달 상태","申请退款","shēnqǐng tuìkuǎn","환불 신청"],
+  ["meituan","배달 상태","取餐码","qǔ cān mǎ","픽업 번호"],
+
+  // 따종디엔핑
+  ["dianping","맛집 찾기","必吃榜","bì chī bǎng","꼭 먹어야 할 맛집 순위"],
+  ["dianping","맛집 찾기","排行榜","páiháng bǎng","랭킹"],
+  ["dianping","맛집 찾기","附近","fùjìn","근처"],
+  ["dianping","맛집 찾기","口味","kǒuwèi","맛"],
+  ["dianping","맛집 찾기","环境","huánjìng","분위기"],
+  ["dianping","맛집 찾기","推荐菜","tuījiàn cài","추천 메뉴"],
+  ["dianping","맛집 찾기","网友推荐","wǎngyǒu tuījiàn","이용자 추천"],
+  ["dianping","맛집 찾기","营业时间","yíngyè shíjiān","영업 시간"],
+  ["dianping","맛집 찾기","收藏","shōucáng","저장(찜)"],
+  ["dianping","맛집 찾기","写评价","xiě píngjià","리뷰 쓰기"],
+  ["dianping","예약·대기","代金券","dàijīn quàn","금액권","100元 쓰는 데 88元에 사는 식"],
+  ["dianping","예약·대기","预订","yùdìng","예약"],
+  ["dianping","예약·대기","在线排队","zàixiàn páiduì","온라인 줄서기"],
+  ["dianping","예약·대기","取号","qǔ hào","대기 번호 받기"],
+  ["dianping","예약·대기","前面还有","qiánmiàn hái yǒu","앞에 남은 팀"],
+  ["dianping","예약·대기","桌","zhuō","테이블(팀)"],
+  ["dianping","예약·대기","包间","bāojiān","룸"],
+
+  // 디디
+  ["didi","호출","您要去哪儿","nín yào qù nǎr","어디로 가세요?","목적지 입력칸"],
+  ["didi","호출","上车点","shàngchē diǎn","탑승 위치"],
+  ["didi","호출","快车","kuàichē","일반 택시(빠른 차)"],
+  ["didi","호출","特惠快车","tèhuì kuàichē","할인 일반차"],
+  ["didi","호출","出租车","chūzūchē","택시"],
+  ["didi","호출","专车","zhuānchē","고급차"],
+  ["didi","호출","拼车","pīnchē","합승"],
+  ["didi","호출","一口价","yì kǒu jià","확정 요금"],
+  ["didi","호출","预估","yùgū","예상 요금"],
+  ["didi","호출","确认呼叫","quèrèn hūjiào","호출하기"],
+  ["didi","호출","同时呼叫","tóngshí hūjiào","여러 차종 동시 호출"],
+  ["didi","이동","正在为您寻找司机","zhèngzài wèi nín xúnzhǎo sījī","기사 찾는 중"],
+  ["didi","이동","司机已接单","sījī yǐ jiē dān","기사 배정됨"],
+  ["didi","이동","车牌号","chēpái hào","차량 번호","沪 = 상하이 번호판"],
+  ["didi","이동","司机正在赶来","sījī zhèngzài gǎn lái","기사가 오는 중"],
+  ["didi","이동","司机已到达","sījī yǐ dàodá","기사 도착"],
+  ["didi","이동","行程中","xíngchéng zhōng","운행 중"],
+  ["didi","이동","行程结束","xíngchéng jiéshù","운행 종료"],
+  ["didi","이동","联系司机","liánxì sījī","기사에게 연락"],
+  ["didi","이동","取消行程","qǔxiāo xíngchéng","호출 취소"],
+  ["didi","이동","取消费","qǔxiāo fèi","취소 수수료"],
+  ["didi","이동","支付车费","zhīfù chēfèi","요금 결제"],
+  ["didi","안전","安全中心","ānquán zhōngxīn","안전 센터"],
+  ["didi","안전","紧急求助","jǐnjí qiúzhù","긴급 도움 요청","경찰 110"],
+  ["didi","안전","遗失物品","yíshī wùpǐn","분실물"],
+  ["didi","안전","投诉","tóusù","신고·불만 접수"],
+
+  // 가오더지도
+  ["amap","길찾기","路线","lùxiàn","경로"],
+  ["amap","길찾기","我的位置","wǒ de wèizhì","내 위치"],
+  ["amap","길찾기","起点","qǐdiǎn","출발지"],
+  ["amap","길찾기","终点","zhōngdiǎn","도착지"],
+  ["amap","길찾기","公交地铁","gōngjiāo dìtiě","대중교통"],
+  ["amap","길찾기","驾车","jiàchē","자동차"],
+  ["amap","길찾기","步行","bùxíng","도보"],
+  ["amap","길찾기","骑行","qíxíng","자전거"],
+  ["amap","길찾기","导航","dǎoháng","내비 시작"],
+  ["amap","길찾기","出发","chūfā","출발"],
+  ["amap","지하철·버스","号线","hào xiàn","~호선","2号线 = 2호선"],
+  ["amap","지하철·버스","换乘","huànchéng","환승"],
+  ["amap","지하철·버스","站","zhàn","역·정류장"],
+  ["amap","지하철·버스","出口","chūkǒu","출구"],
+  ["amap","지하철·버스","首班","shǒu bān","첫차"],
+  ["amap","지하철·버스","末班","mò bān","막차"],
+  ["amap","지하철·버스","实时公交","shíshí gōngjiāo","실시간 버스"],
+  ["amap","지하철·버스","拥堵","yōngdǔ","정체"],
+];
+const TERMS = T.map(([app, cat, zh, py, ko, tip], i) => ({ i, app, cat, zh, py, ko, tip: tip || "" }));
+
+const PHRASES = [
+  ["我是韩国游客，不会说中文。","Wǒ shì Hánguó yóukè, bú huì shuō Zhōngwén.","저는 한국 관광객이라 중국어를 못해요."],
+  ["可以用支付宝或微信付款吗？","Kěyǐ yòng Zhīfùbǎo huò Wēixìn fùkuǎn ma?","알리페이나 위챗으로 결제돼요?"],
+  ["请扫我的付款码。","Qǐng sǎo wǒ de fùkuǎn mǎ.","제 결제 코드를 스캔해 주세요."],
+  ["我来扫您的收款码。","Wǒ lái sǎo nín de shōukuǎn mǎ.","제가 가게 QR을 스캔할게요."],
+  ["我的外国卡付款失败了，可以付现金吗？","Wǒ de wàiguó kǎ fùkuǎn shībài le, kěyǐ fù xiànjīn ma?","외국 카드 결제가 실패했는데 현금 돼요?"],
+  ["多少钱？","Duōshao qián?","얼마예요?"],
+  ["这个不要辣。","Zhège bú yào là.","이건 안 맵게 해 주세요."],
+  ["我对花生过敏。","Wǒ duì huāshēng guòmǐn.","땅콩 알레르기가 있어요."],
+  ["我要打包。","Wǒ yào dǎbāo.","포장해 주세요."],
+  ["请给我菜单。","Qǐng gěi wǒ càidān.","메뉴판 주세요."],
+  ["外卖请放在前台，谢谢。","Wàimài qǐng fàng zài qiántái, xièxie.","배달 음식은 프런트에 맡겨 주세요."],
+  ["请带我去这个地址。","Qǐng dài wǒ qù zhège dìzhǐ.","이 주소로 가 주세요."],
+  ["我在这里等您。","Wǒ zài zhèlǐ děng nín.","(택시 기사에게) 여기서 기다리고 있어요."],
+  ["洗手间在哪里？","Xǐshǒujiān zài nǎlǐ?","화장실 어디예요?"],
+  ["地铁站怎么走？","Dìtiě zhàn zěnme zǒu?","지하철역 어떻게 가요?"],
+  ["可以帮我叫一辆出租车吗？","Kěyǐ bāng wǒ jiào yí liàng chūzūchē ma?","택시 한 대 불러 주실 수 있어요?"],
+  ["这里可以借充电宝吗？","Zhèlǐ kěyǐ jiè chōngdiàn bǎo ma?","여기서 보조배터리 빌릴 수 있어요?"],
+  ["请帮我拍张照片，谢谢！","Qǐng bāng wǒ pāi zhāng zhàopiàn, xièxie!","사진 한 장 찍어 주세요, 감사합니다!"],
+];
+
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const store = { get(k){ try { return localStorage.getItem(k) } catch { return null } }, set(k,v){ try { localStorage.setItem(k,v) } catch {} } };
+
+/* ---------- tabs ---------- */
+const VIEWS = ["screen","words","phrases"];
+function show(v) {
+  if (!VIEWS.includes(v)) v = "screen";
+  VIEWS.forEach(x => { $("#view-"+x).hidden = x !== v });
+  document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.v === v)));
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => {
+  if (location.hash.slice(1) === b.dataset.v) show(b.dataset.v); else location.hash = b.dataset.v;
+}));
+window.addEventListener("hashchange", () => show(location.hash.slice(1)));
+show(location.hash.slice(1));
+
+/* ---------- speech ---------- */
+const canSpeak = "speechSynthesis" in window;
+function say(text) {
+  if (!canSpeak) return;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "zh-CN"; u.rate = 0.85;
+    const v = speechSynthesis.getVoices().find(v => /zh[-_]CN/i.test(v.lang));
+    if (v) u.voice = v;
+    speechSynthesis.speak(u);
+  } catch {}
+}
+const SPEAK_SVG = '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"></path><path d="M16.5 8.5a5 5 0 0 1 0 7"></path></svg>';
+
+/* ---------- glossary ---------- */
+const plain = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[\s']/g, "").toLowerCase();
+TERMS.forEach(t => { t.key = (t.zh + "|" + plain(t.py) + "|" + t.ko.replace(/\s/g,"") + "|" + t.tip.replace(/\s/g,"")).toLowerCase() });
+let curApp = store.get("app") || "all";
+
+function renderChips() {
+  const opts = [["all", { ko: "전체", zh: "", color: "var(--ink)" }], ...Object.entries(APPS)];
+  $("#apps").innerHTML = opts.map(([k, a]) =>
+    `<button class="chip" data-app="${k}" aria-pressed="${k === curApp}">${k === "all" ? "" : `<span class="dot" style="background:${a.color}"></span>`}${a.ko}${a.zh ? ` <span class="zh">${a.zh}</span>` : ""}</button>`).join("");
+  $("#apps").querySelectorAll(".chip").forEach(b => b.onclick = () => { curApp = b.dataset.app; store.set("app", curApp); renderChips(); renderTerms(); });
+}
+function termRow(t, showApp) {
+  const a = APPS[t.app];
+  return `<div class="term">
+    <div><span class="h">${esc(t.zh)}</span></div>
+    <div class="py">${esc(t.py)}</div>
+    <div class="ko">${esc(t.ko)}${showApp ? `<span class="app"><span class="dot" style="background:${a.color}"></span>${a.ko}</span>` : ""}</div>
+    ${t.tip ? `<div class="tip">${esc(t.tip)}</div>` : ""}
+    ${canSpeak ? `<button class="speak" data-say="${esc(t.zh)}" aria-label="${esc(t.zh)} 발음 듣기">${SPEAK_SVG}</button>` : ""}
+  </div>`;
+}
+function renderTerms() {
+  const q = plain($("#q").value.trim());
+  let list = TERMS.filter(t => curApp === "all" || t.app === curApp);
+  if (q) list = list.filter(t => t.key.includes(q));
+  $("#count").textContent = q ? `${list.length}개 찾음` : `${list.length}개`;
+  if (!list.length) { $("#terms").innerHTML = `<div class="list"><div class="empty">"${esc($("#q").value)}" 에 맞는 용어가 없어요. 화면 번역 탭에서 AI로 물어보세요.</div></div>`; return; }
+  const groups = new Map();
+  list.forEach(t => { const g = (curApp === "all" ? APPS[t.app].ko + " · " : "") + t.cat; if (!groups.has(g)) groups.set(g, []); groups.get(g).push(t) });
+  $("#terms").innerHTML = [...groups].map(([g, ts]) =>
+    `<div class="cat">${esc(g)}</div><div class="list">${ts.map(t => termRow(t, false)).join("")}</div>`).join("");
+}
+$("#terms").addEventListener("click", e => { const b = e.target.closest("[data-say]"); if (b) say(b.dataset.say) });
+$("#q").addEventListener("input", renderTerms);
+renderChips(); renderTerms();
+
+/* ---------- phrases + overlay ---------- */
+$("#phrases").innerHTML = `<div class="list">${PHRASES.map(([zh, py, ko], i) =>
+  `<button class="phrase" data-p="${i}"><span class="zh">${esc(zh)}</span><span class="ko">${esc(ko)}</span><span class="show">크게</span></button>`).join("")}</div>`;
+let ovText = "";
+function openOverlay(zh, py, ko) {
+  ovText = zh; $("#ov-zh").textContent = zh; $("#ov-py").textContent = py; $("#ov-ko").textContent = ko;
+  $("#ov-speak").hidden = !canSpeak; $("#overlay").hidden = false; $("#ov-close").focus();
+}
+$("#phrases").addEventListener("click", e => { const b = e.target.closest("[data-p]"); if (b) openOverlay(...PHRASES[+b.dataset.p]) });
+$("#ov-close").onclick = () => { $("#overlay").hidden = true };
+$("#ov-speak").onclick = () => say(ovText);
+$("#overlay").addEventListener("dblclick", () => { $("#overlay").hidden = true });
+document.addEventListener("keydown", e => { if (e.key === "Escape") $("#overlay").hidden = true });
+
+/* ---------- offline matcher for pasted text ---------- */
+const byZh = new Map(); TERMS.forEach(t => { if (!byZh.has(t.zh)) byZh.set(t.zh, t) });
+const maxLen = Math.max(...TERMS.map(t => t.zh.length));
+function matchTerms(text) {
+  const out = [], seen = new Set();
+  for (let i = 0; i < text.length;) {
+    let hit = null;
+    for (let L = Math.min(maxLen, text.length - i); L >= 2; L--) { const t = byZh.get(text.substr(i, L)); if (t) { hit = t; break } }
+    if (hit) { if (!seen.has(hit.zh)) { seen.add(hit.zh); out.push(hit) } i += hit.zh.length } else i++;
+  }
+  return out;
+}
+function renderFound() {
+  const v = $("#txt").value;
+  const found = matchTerms(v);
+  $("#found").innerHTML = found.length
+    ? found.map(t => `<div class="fz"><span class="zh">${esc(t.zh)}</span><span>${esc(t.ko)}</span></div>`).join("")
+    : (v.trim() ? `<span class="count">용어집에 있는 단어가 없어요. AI 번역이나 파파고를 써보세요.</span>` : "");
+  $("#papago").href = "https://papago.naver.com/?sk=zh-CN&tk=ko&st=" + encodeURIComponent(v.slice(0, 1000));
+}
+$("#txt").addEventListener("input", renderFound);
+renderFound();
+
+/* ---------- AI (claude.ai sample capability) ---------- */
+function md(text) {
+  const inline = s => esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+  let html = "", list = null;
+  const close = () => { if (list) { html += `</${list}>`; list = null } };
+  for (const raw of text.split("\n")) {
+    const line = raw.trim();
+    if (!line) { close(); continue }
+    let m;
+    if ((m = line.match(/^#{1,4}\s*(.+)/))) { close(); html += `<h3>${inline(m[1])}</h3>` }
+    else if ((m = line.match(/^[-*•]\s+(.+)/))) { if (list !== "ul") { close(); html += "<ul>"; list = "ul" } html += `<li>${inline(m[1])}</li>` }
+    else if ((m = line.match(/^\d+[.)]\s+(.+)/))) { if (list !== "ol") { close(); html += "<ol>"; list = "ol" } html += `<li>${inline(m[1])}</li>` }
+    else { close(); html += `<p>${inline(line)}</p>` }
+  }
+  close(); return html;
+}
+function errCopy(e) {
+  switch (e && e.code) {
+    case "not_granted": return "Claude 사용을 허용하지 않아서 AI 번역을 쓸 수 없어요. 용어집과 파파고는 그대로 쓸 수 있어요.";
+    case "rate_limited": return "요청이 많아요. 잠시 뒤 다시 눌러 주세요.";
+    case "images_unavailable": return "이 화면에서는 이미지를 보낼 수 없어요. 글자를 복사해서 아래 칸에 붙여넣어 주세요.";
+    case "cancelled": return "중지했어요.";
+    default: return "번역하지 못했어요. 인터넷 연결을 확인하고 다시 시도해 주세요." + (e && e.code ? ` (${e.code})` : "");
+  }
+}
+
+const IMG_PROMPT = (goal) => `너는 중국 상하이를 여행 중인 한국인을 돕는 통역사야. 첨부 이미지는 중국 앱(위챗, 알리페이, 메이퇀, 따종디엔핑, 디디, 가오더지도 등)의 화면 캡처야.
+${goal ? `사용자가 지금 하려는 일: ${goal}\n` : ""}
+한국어로, 아래 형식 그대로 답해. 중국어 원문은 **굵게** 감싸.
+
+## 이 화면은
+무슨 앱의 어떤 화면인지 1~2문장.
+
+## 화면 글자
+- **中文** (병음) → 한국어 뜻
+화면의 중요한 글자(버튼, 메뉴, 금액, 경고 문구)를 위에서 아래 순서로, 최대 25줄. 금액은 위안 그대로 쓰고 괄호에 대략 원화(1위안≈190원)도 적어.
+
+## 지금 할 일
+1. 사용자가 하려는 일을 기준으로(없으면 이 화면에서 보통 하는 일) 눌러야 할 버튼을 중국어 원문과 위치(위/아래/오른쪽 등)와 함께 1~4단계로.
+결제, 본인 인증, 개인정보 입력, 자동 결제 동의 화면이면 마지막에 주의할 점을 한 줄 덧붙여.`;
+
+const TXT_PROMPT = (t) => `중국 여행 중인 한국인이 중국 앱에서 복사한 문구야. 한국어로 아래 형식대로 답해. 중국어 원문은 **굵게** 감싸.
+
+## 번역
+자연스러운 한국어 번역.
+
+## 설명
+앱 버튼·메뉴·안내 문구라면 무슨 기능인지, 누르면 어떻게 되는지 1~3줄. 단어별 뜻이 필요하면 "- **中文** (병음) → 뜻" 목록으로.
+
+문구:
+"""
+${t}
+"""`;
+
+let sample = null, ctl = null, imgBlob = null;
+
+async function shrink(file) {
+  try {
+    const bmp = await createImageBitmap(file);
+    const s = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+    const c = document.createElement("canvas");
+    c.width = Math.round(bmp.width * s); c.height = Math.round(bmp.height * s);
+    c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+    return await new Promise(r => c.toBlob(b => r(b || file), "image/jpeg", 0.85));
+  } catch { return file }
+}
+function setImage(file) {
+  if (!file || !file.type.startsWith("image/")) return;
+  imgBlob = file;
+  const p = $("#preview"); p.src = URL.createObjectURL(file); p.hidden = false;
+  $("#drop-text").hidden = true; $("#drop").classList.add("has");
+  $("#go-img").disabled = !sample;
+}
+$("#file").addEventListener("change", e => setImage(e.target.files[0]));
+document.addEventListener("paste", e => {
+  const f = [...(e.clipboardData?.files || [])].find(f => f.type.startsWith("image/"));
+  if (f) { setImage(f); show("screen") }
+});
+$("#drop").addEventListener("dragover", e => e.preventDefault());
+$("#drop").addEventListener("drop", e => { e.preventDefault(); setImage(e.dataTransfer.files[0]) });
+
+async function run(outEl, prompt, opts, btn) {
+  ctl = new AbortController();
+  outEl.hidden = false;
+  outEl.innerHTML = `<p class="thinking">읽는 중이에요… 보통 10~30초 걸려요.</p>`;
+  btn.disabled = true; $("#stop").hidden = btn.id !== "go-img";
+  try {
+    const { text } = await sample(prompt, { ...opts, signal: ctl.signal, onText: ({ text }) => { outEl.innerHTML = md(text) } });
+    outEl.innerHTML = md(text);
+  } catch (e) {
+    outEl.innerHTML = (e.text ? md(e.text) : "") + `<div class="note">${esc(errCopy(e))}</div>`;
+  } finally {
+    btn.disabled = false; $("#stop").hidden = true;
+    if (btn.id === "go-img") btn.disabled = !imgBlob;
+  }
+}
+$("#stop").onclick = () => ctl && ctl.abort();
+$("#go-img").onclick = async () => {
+  if (!imgBlob || !sample) return;
+  const blob = await shrink(imgBlob);
+  run($("#out"), IMG_PROMPT($("#goal").value.trim()), { images: [blob] }, $("#go-img"));
+};
+$("#go-txt").onclick = () => {
+  const t = $("#txt").value.trim();
+  if (!t || !sample) return;
+  run($("#out-txt"), TXT_PROMPT(t.slice(0, 4000)), { modelTier: "quick" }, $("#go-txt"));
+};
+
+function aiOff() {
+  $("#ai-off").hidden = false; $("#go-img").disabled = true; $("#go-txt").hidden = true;
+}
+$("#go-txt").hidden = true;
+(async () => {
+  if (!window.claude || typeof window.claude.use !== "function") { aiOff(); return }
+  try { sample = await window.claude.use("sample") } catch { sample = null }
+  if (!sample) { aiOff(); return }
+  $("#go-txt").hidden = false;
+  $("#go-img").disabled = !imgBlob;
+})();
+</script>
+</body></html>
