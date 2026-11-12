@@ -158,7 +158,7 @@ label.f { display: flex; flex-direction: column; gap: 6px; font-size: 13px; colo
 .panel.auto .lead b.zh { color: var(--seal) }
 .pill { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--line); color: var(--muted) }
 .pill.on { background: var(--accent); color: var(--accent-ink) }
-.steps ol { margin: 0 0 10px; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 14px }
+.steps-list { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 14px }
 .check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; cursor: pointer }
 .check input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--accent); flex: 0 0 auto }
 .check small { color: var(--muted); font-size: 12px; line-height: 1.5 }
@@ -186,20 +186,19 @@ label.f { display: flex; flex-direction: column; gap: 6px; font-size: 13px; colo
         <strong>중국 앱 자동 번역</strong>
         <span class="pill" id="auto-state">꺼짐</span>
       </div>
-      <p class="lead">위챗·알리페이·메이퇀·따종디엔핑·디디·가오더지도·어러머·타오바오·12306 을 열면 중국어 글자 위에 한국어 뜻이 바로 떠요. 오른쪽 <b class="zh">译</b> 버튼을 누르면 라벨이 숨겨지고, 위아래로 끌어 옮길 수 있어요.</p>
-      <div id="auto-off-steps" class="steps">
-        <ol>
-          <li>아래 <b>자동 번역 켜기</b> → 설치된 앱(또는 다운로드한 앱) → <b>중국앱 자동 번역</b> → 사용</li>
-          <li>"제한된 설정"이라며 회색으로 막혀 있으면: <b>앱 정보 열기</b> → 오른쪽 위 ⋮ → <b>제한된 설정 허용</b> 후 1번 다시</li>
-        </ol>
-        <div class="btn-row">
-          <button class="btn" id="auto-open">자동 번역 켜기</button>
-          <button class="btn ghost" id="auto-info">앱 정보 열기</button>
-        </div>
+      <p class="lead">켜 두면 위챗·알리페이·메이퇀·디디 등 어떤 앱이든 화면의 중국어를 읽어 그 자리에 한국어 뜻을 띄워요. 화면을 넘기면 다시 읽어요. 오른쪽 <b class="zh">译</b> 버튼: 누르면 끄기/켜기, 끌면 이동, 길게 누르면 이 앱 열기.</p>
+      <ol class="steps-list">
+        <li id="step-overlay"><b>다른 앱 위에 표시</b> 허용 <span class="pill" id="overlay-state">필요</span></li>
+        <li><b>자동 번역 시작</b> → 화면 녹화 안내가 뜨면 <b>전체 화면</b> 선택 후 시작</li>
+      </ol>
+      <div class="btn-row">
+        <button class="btn ghost" id="auto-overlay">다른 앱 위에 표시 허용</button>
+        <button class="btn" id="auto-start">자동 번역 시작</button>
+        <button class="btn ghost" id="auto-stop" hidden>자동 번역 끄기</button>
       </div>
       <label class="check" for="auto-ai">
         <input type="checkbox" id="auto-ai">
-        <span>용어집에 없는 글자도 AI로 번역<br><small>켜면 이 중국 앱들의 화면 글자(위챗 대화 포함)가 번역을 위해 Anthropic(Claude)으로 전송되고 API 요금이 나가요. 한 번 번역한 글자는 기억해서 다시 보내지 않아요.</small></span>
+        <span>용어집에 없는 글자도 AI로 번역<br><small>글자 읽기(OCR)는 휴대폰 안에서만 해요. 이걸 켜면 용어집에 없는 중국어 문구(위챗 대화 포함)를 번역하려고 Anthropic(Claude)으로 보내고 API 요금이 나가요. 한 번 번역한 문구는 기억해서 다시 보내지 않아요.</small></span>
       </label>
       <p class="count" id="auto-ai-hint" hidden>AI 번역을 쓰려면 아래에 Claude API 키를 먼저 저장해 주세요.</p>
     </div>
@@ -887,15 +886,20 @@ function renderAuto() {
   let st = {};
   try { st = JSON.parse(NATIVE.autoStatus() || "{}") } catch {}
   $("#auto-panel").hidden = false;
-  $("#auto-state").textContent = st.enabled ? "켜짐" : "꺼짐";
-  $("#auto-state").classList.toggle("on", !!st.enabled);
-  $("#auto-off-steps").hidden = !!st.enabled;
+  $("#auto-state").textContent = st.running ? "실행 중" : "꺼짐";
+  $("#auto-state").classList.toggle("on", !!st.running);
+  $("#overlay-state").textContent = st.overlay ? "허용됨" : "필요";
+  $("#overlay-state").classList.toggle("on", !!st.overlay);
+  $("#auto-overlay").hidden = !!st.overlay;
+  $("#auto-start").hidden = !!st.running;
+  $("#auto-stop").hidden = !st.running;
   $("#auto-ai").checked = !!st.ai;
   $("#auto-ai-hint").hidden = !(st.ai && !hasKey());
 }
 window.__autoRefresh = () => { renderAuto(); renderKey() };
-$("#auto-open").onclick = () => { try { NATIVE.openAccessibilitySettings() } catch {} };
-$("#auto-info").onclick = () => { try { NATIVE.openAppInfo() } catch {} };
+$("#auto-overlay").onclick = () => { try { NATIVE.openOverlaySettings() } catch {} };
+$("#auto-start").onclick = () => { try { NATIVE.startAuto() } catch {} };
+$("#auto-stop").onclick = () => { try { NATIVE.stopAuto() } catch {} };
 $("#auto-ai").onchange = (e) => { try { NATIVE.setAutoAi(e.target.checked) } catch {} renderAuto() };
 document.addEventListener("visibilitychange", () => { if (!document.hidden && NATIVE) window.__autoRefresh() });
 

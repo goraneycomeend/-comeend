@@ -2,6 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- 자동 번역: 화면 위에 라벨 그리기 + 화면 캡처(MediaProjection) 포그라운드 서비스 -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- Android 11+ 에서 TTS 엔진을 찾기 위해 필요 -->
     <queries>
@@ -41,18 +46,11 @@
             </intent-filter>
         </activity>
 
-        <!-- 중국 앱 화면 글자를 읽어 한국어 라벨을 덮어 보여주는 접근성 서비스 -->
+
+        <!-- 화면을 캡처해 중국어를 OCR 로 읽고, 그 자리에 한국어 라벨을 띄우는 서비스 -->
         <service
-            android:name=".AutoTranslateService"
-            android:label="@string/service_label"
+            android:name=".ScreenTranslateService"
             android:exported="false"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
-            <intent-filter>
-                <action android:name="android.accessibilityservice.AccessibilityService" />
-            </intent-filter>
-            <meta-data
-                android:name="android.accessibilityservice"
-                android:resource="@xml/accessibility_config" />
-        </service>
+            android:foregroundServiceType="mediaProjection" />
     </application>
 </manifest>

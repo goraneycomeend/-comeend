@@ -59,4 +59,6 @@ android {
 
 dependencies {
     implementation "com.anthropic:anthropic-java:3.3.0"
+    // 기기 안에서 도는 중국어 OCR (모델이 APK 에 포함되어 인터넷·구글 서비스 없이 동작)
+    implementation "com.google.mlkit:text-recognition-chinese:16.0.1"
 }

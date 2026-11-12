@@ -1,13 +1,16 @@
 package com.comeend.tongyeok;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -37,6 +40,8 @@ import java.util.concurrent.Executors;
  */
 public class MainActivity extends Activity {
     private static final int REQ_PICK_IMAGE = 1;
+    private static final int REQ_CAPTURE = 2;
+    private static final int REQ_NOTIFY = 3;
     private static final String PREFS = "tongyeok";
     private static final String KEY_API = "anthropic_api_key";
     private static final int MAX_SIDE = 1600;
@@ -117,6 +122,19 @@ public class MainActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_CAPTURE) {
+            if (resultCode == RESULT_OK && data != null) {
+                Intent svc = new Intent(this, ScreenTranslateService.class)
+                        .putExtra(ScreenTranslateService.EXTRA_RESULT_CODE, resultCode)
+                        .putExtra(ScreenTranslateService.EXTRA_DATA, data);
+                startForegroundService(svc);
+                toast("자동 번역을 시작했어요. 중국 앱을 열어 보세요");
+                moveTaskToBack(true);
+            } else {
+                toast("화면 녹화를 허용해야 자동 번역을 쓸 수 있어요");
+            }
+            return;
+        }
         if (requestCode == REQ_PICK_IMAGE && fileCallback != null) {
             fileCallback.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data));
             fileCallback = null;
@@ -215,15 +233,38 @@ public class MainActivity extends Activity {
         }
     }
 
-    private boolean isServiceEnabled() {
-        String enabled = Settings.Secure.getString(getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
-        if (enabled == null) return false;
-        ComponentName me = new ComponentName(this, AutoTranslateService.class);
-        for (String s : enabled.split(":")) {
-            ComponentName c = ComponentName.unflattenFromString(s);
-            if (me.equals(c)) return true;
+    private void startAutoTranslate() {
+        if (!Settings.canDrawOverlays(this)) {
+            toast("먼저 '다른 앱 위에 표시'를 허용해 주세요");
+            try {
+                startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.fromParts("package", getPackageName(), null)));
+            } catch (ActivityNotFoundException ignored) { }
+            return;
         }
-        return false;
+        if (Build.VERSION.SDK_INT >= 33
+                && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQ_NOTIFY);
+            return;   // 결과를 받은 뒤 이어서 진행
+        }
+        MediaProjectionManager mpm = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
+        try {
+            startActivityForResult(mpm.createScreenCaptureIntent(), REQ_CAPTURE);
+        } catch (ActivityNotFoundException e) {
+            toast("이 기기에서는 화면 녹화를 쓸 수 없어요");
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQ_NOTIFY) {
+            // 알림을 거부해도 번역은 동작한다 (상단 알림만 안 보임)
+            MediaProjectionManager mpm = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
+            try {
+                startActivityForResult(mpm.createScreenCaptureIntent(), REQ_CAPTURE);
+            } catch (ActivityNotFoundException ignored) { }
+        }
     }
 
     @Override
@@ -294,14 +335,14 @@ public class MainActivity extends Activity {
             });
         }
 
-        /** {"enabled":접근성 서비스 켜짐, "ai":AI 자동 번역 켜짐, "labels":라벨 표시 중} */
+        /** {"overlay":다른 앱 위에 표시 허용, "running":자동 번역 실행 중, "ai":AI 번역 켜짐} */
         @JavascriptInterface
         public String autoStatus() {
             try {
                 return new JSONObject()
-                        .put("enabled", isServiceEnabled())
-                        .put("ai", prefs().getBoolean(AutoTranslateService.KEY_AUTO_AI, false))
-                        .put("labels", prefs().getBoolean(AutoTranslateService.KEY_LABELS_ON, true))
+                        .put("overlay", Settings.canDrawOverlays(MainActivity.this))
+                        .put("running", ScreenTranslateService.isRunning())
+                        .put("ai", prefs().getBoolean(ScreenTranslateService.KEY_AUTO_AI, false))
                         .toString();
             } catch (Exception e) {
                 return "{}";
@@ -310,30 +351,31 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public void setAutoAi(boolean on) {
-            prefs().edit().putBoolean(AutoTranslateService.KEY_AUTO_AI, on).apply();
+            prefs().edit().putBoolean(ScreenTranslateService.KEY_AUTO_AI, on).apply();
         }
 
         @JavascriptInterface
-        public void openAccessibilitySettings() {
+        public void openOverlaySettings() {
             main.post(() -> {
                 try {
-                    startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+                    startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                            Uri.fromParts("package", getPackageName(), null)));
                 } catch (ActivityNotFoundException e) {
-                    toast("설정 → 접근성 에서 '중국앱 자동 번역'을 켜 주세요");
+                    toast("설정 → 애플리케이션 → 중국앱 통역노트 → 다른 앱 위에 표시 를 켜 주세요");
                 }
             });
         }
 
-        /** Android 13+ 에서 APK 로 설치한 앱의 접근성 권한을 막는 '제한된 설정'을 풀 수 있는 앱 정보 화면 */
         @JavascriptInterface
-        public void openAppInfo() {
+        public void startAuto() {
+            main.post(MainActivity.this::startAutoTranslate);
+        }
+
+        @JavascriptInterface
+        public void stopAuto() {
             main.post(() -> {
-                try {
-                    startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                            Uri.fromParts("package", getPackageName(), null)));
-                } catch (ActivityNotFoundException e) {
-                    toast("설정 → 애플리케이션 에서 '중국앱 통역노트'를 찾아 주세요");
-                }
+                ScreenTranslateService.stop(MainActivity.this);
+                web.evaluateJavascript("window.__autoRefresh && window.__autoRefresh()", null);
             });
         }
 
