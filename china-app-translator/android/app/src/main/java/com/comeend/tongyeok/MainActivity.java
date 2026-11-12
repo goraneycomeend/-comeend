@@ -2,6 +2,7 @@ package com.comeend.tongyeok;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -10,6 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.util.Base64;
 import android.webkit.JavascriptInterface;
@@ -213,6 +215,24 @@ public class MainActivity extends Activity {
         }
     }
 
+    private boolean isServiceEnabled() {
+        String enabled = Settings.Secure.getString(getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+        if (enabled == null) return false;
+        ComponentName me = new ComponentName(this, AutoTranslateService.class);
+        for (String s : enabled.split(":")) {
+            ComponentName c = ComponentName.unflattenFromString(s);
+            if (me.equals(c)) return true;
+        }
+        return false;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // 설정 화면에서 돌아오면 자동 번역 상태 다시 표시
+        if (pageReady) web.evaluateJavascript("window.__autoRefresh && window.__autoRefresh()", null);
+    }
+
     private ClaudeTranslator translator;
     private String translatorKey;
 
@@ -271,6 +291,49 @@ public class MainActivity extends Activity {
                     }
                 }
                 js("window.__aiDone(" + JSONObject.quote(id) + "," + ok + "," + JSONObject.quote(text) + ")");
+            });
+        }
+
+        /** {"enabled":접근성 서비스 켜짐, "ai":AI 자동 번역 켜짐, "labels":라벨 표시 중} */
+        @JavascriptInterface
+        public String autoStatus() {
+            try {
+                return new JSONObject()
+                        .put("enabled", isServiceEnabled())
+                        .put("ai", prefs().getBoolean(AutoTranslateService.KEY_AUTO_AI, false))
+                        .put("labels", prefs().getBoolean(AutoTranslateService.KEY_LABELS_ON, true))
+                        .toString();
+            } catch (Exception e) {
+                return "{}";
+            }
+        }
+
+        @JavascriptInterface
+        public void setAutoAi(boolean on) {
+            prefs().edit().putBoolean(AutoTranslateService.KEY_AUTO_AI, on).apply();
+        }
+
+        @JavascriptInterface
+        public void openAccessibilitySettings() {
+            main.post(() -> {
+                try {
+                    startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+                } catch (ActivityNotFoundException e) {
+                    toast("설정 → 접근성 에서 '중국앱 자동 번역'을 켜 주세요");
+                }
+            });
+        }
+
+        /** Android 13+ 에서 APK 로 설치한 앱의 접근성 권한을 막는 '제한된 설정'을 풀 수 있는 앱 정보 화면 */
+        @JavascriptInterface
+        public void openAppInfo() {
+            main.post(() -> {
+                try {
+                    startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                            Uri.fromParts("package", getPackageName(), null)));
+                } catch (ActivityNotFoundException e) {
+                    toast("설정 → 애플리케이션 에서 '중국앱 통역노트'를 찾아 주세요");
+                }
             });
         }
 

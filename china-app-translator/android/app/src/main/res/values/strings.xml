@@ -2,4 +2,6 @@
 <resources>
     <string name="app_name">중국앱 통역노트</string>
     <string name="share_label">통역노트로 번역</string>
+    <string name="service_label">중국앱 자동 번역</string>
+    <string name="service_desc">위챗, 알리페이, 메이퇀, 디디, 가오더지도 등 중국 앱을 열면 화면의 중국어 글자 위에 한국어 뜻을 띄워 줍니다. 이 앱들의 화면 글자만 읽으며, \'AI 번역\'을 켠 경우 용어집에 없는 글자를 번역하려고 Anthropic(Claude)으로 보냅니다. 다른 앱의 내용은 읽지 않습니다.</string>
 </resources>
