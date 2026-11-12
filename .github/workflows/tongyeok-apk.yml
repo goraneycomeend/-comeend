@@ -1,0 +1,75 @@
+name: 중국앱 통역노트 APK
+
+on:
+  push:
+    branches: ['**']
+    paths:
+      - 'china-app-translator/**'
+      - '.github/workflows/tongyeok-apk.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tongyeok-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: china-app-translator
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+          log-accepted-android-sdk-licenses: false
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+
+      - name: Sync web page into APK assets
+        run: ./sync-web.sh
+
+      - name: Build release APK
+        working-directory: china-app-translator/android
+        env:
+          VERSION_CODE: ${{ github.run_number }}
+        run: gradle assembleRelease --no-daemon --stacktrace
+
+      - name: Rename APK
+        id: apk
+        run: |
+          SRC=$(ls android/app/build/outputs/apk/release/*.apk | head -1)
+          DEST="tongyeok-${{ github.run_number }}.apk"
+          cp "$SRC" "$DEST"
+          echo "path=china-app-translator/$DEST" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tongyeok-apk
+          path: ${{ steps.apk.outputs.path }}
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: tongyeok-build-${{ github.run_number }}
+          name: 중국앱 통역노트 빌드 #${{ github.run_number }}
+          body: |
+            폰에서 아래 `.apk` 파일을 눌러 다운로드한 뒤 설치하세요.
+            브랜치: `${{ github.ref_name }}` · 커밋: `${{ github.sha }}`
+          files: ${{ steps.apk.outputs.path }}
+          # 스킨지기의 /releases/latest 링크를 건드리지 않도록 항상 프리릴리스로 올린다
+          prerelease: true
+          make_latest: false

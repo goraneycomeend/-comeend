@@ -150,6 +150,10 @@ label.f { display: flex; flex-direction: column; gap: 6px; font-size: 13px; colo
 .overlay .btn-row { margin-top: 12px }
 .overlay .hint { font-size: 12px; color: var(--muted) }
 
+.keyrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 14px }
+.keyform { display: flex; flex-direction: column; gap: 8px }
+.keyform input { font-family: var(--font-mono); font-size: 14px }
+.btn.small { padding: 7px 12px; font-size: 13px }
 .footer-note { font-size: 12px; color: var(--muted); text-align: center; margin-top: 8px }
 @media (prefers-reduced-motion: no-preference) { .tab, .chip, .btn { transition: background .15s, color .15s } }
 </style>
@@ -183,6 +187,22 @@ label.f { display: flex; flex-direction: column; gap: 6px; font-size: 13px; colo
         <button class="btn ghost" id="stop" hidden>중지</button>
       </div>
       <div class="note" id="ai-off" hidden>AI 번역은 claude.ai 에서 이 페이지를 열었을 때만 동작해요. 아래 용어집과 문장 카드는 오프라인에서도 쓸 수 있어요.</div>
+    </div>
+
+    <div class="panel" id="key-panel" hidden>
+      <div id="key-set" hidden class="keyrow">
+        <span><span class="tag">AI 연결됨</span> Claude API 키가 저장돼 있어요.</span>
+        <button class="btn ghost small" id="key-change">키 변경</button>
+      </div>
+      <div id="key-form" class="keyform">
+        <strong>AI 번역을 쓰려면 Claude API 키가 필요해요</strong>
+        <p class="lead">console.anthropic.com 에서 키를 만들어 붙여넣으세요. 키는 이 휴대폰에만 저장되고, 사용 요금은 그 계정에서 나가요. 용어집과 문장 카드는 키 없이도 돼요.</p>
+        <input type="password" id="key" placeholder="sk-ant-..." autocomplete="off">
+        <div class="btn-row">
+          <button class="btn" id="key-save">저장</button>
+          <a class="btn ghost" href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener" style="text-align:center;text-decoration:none">키 만들러 가기</a>
+        </div>
+      </div>
     </div>
 
     <div class="panel">
@@ -557,8 +577,11 @@ window.addEventListener("hashchange", () => show(location.hash.slice(1)));
 show(location.hash.slice(1));
 
 /* ---------- speech ---------- */
-const canSpeak = "speechSynthesis" in window;
+// 안드로이드 앱(WebView) 안에서 열렸을 때만 존재하는 네이티브 브리지
+const NATIVE = window.TongyeokApp || null;
+const canSpeak = !!NATIVE || "speechSynthesis" in window;
 function say(text) {
+  if (NATIVE) { try { NATIVE.speak(text) } catch {} return }
   if (!canSpeak) return;
   try {
     speechSynthesis.cancel();
@@ -620,6 +643,13 @@ $("#ov-close").onclick = () => { $("#overlay").hidden = true };
 $("#ov-speak").onclick = () => say(ovText);
 $("#overlay").addEventListener("dblclick", () => { $("#overlay").hidden = true });
 document.addEventListener("keydown", e => { if (e.key === "Escape") $("#overlay").hidden = true });
+// 안드로이드 뒤로가기: 처리했으면 true
+window.__back = () => {
+  if (!$("#overlay").hidden) { $("#overlay").hidden = true; return true }
+  const v = location.hash.slice(1);
+  if (v && v !== "screen") { location.hash = "screen"; return true }
+  return false;
+};
 
 /* ---------- offline matcher for pasted text ---------- */
 const byZh = new Map(); TERMS.forEach(t => { if (!byZh.has(t.zh)) byZh.set(t.zh, t) });
@@ -698,7 +728,30 @@ const TXT_PROMPT = (t) => `중국 여행 중인 한국인이 중국 앱에서 �
 ${t}
 """`;
 
+// AI 백엔드: claude.ai 에서는 sample capability, 안드로이드 앱에서는 네이티브 브리지(사용자 API 키)
 let sample = null, ctl = null, imgBlob = null;
+
+const pending = new Map();
+let seq = 0;
+window.__aiDone = (id, ok, text) => {
+  const p = pending.get(id); if (!p) return;
+  pending.delete(id);
+  ok ? p.resolve({ text }) : p.reject({ code: "native", message: text });
+};
+function nativeAsk(prompt, b64, quick, signal) {
+  return new Promise((resolve, reject) => {
+    const id = "r" + (++seq);
+    pending.set(id, { resolve, reject });
+    signal.addEventListener("abort", () => { if (pending.delete(id)) reject({ code: "cancelled" }) });
+    try { NATIVE.ask(id, prompt, b64 || "", !!quick) } catch (e) { pending.delete(id); reject({ code: "native", message: "앱 내부 오류: " + e }) }
+  });
+}
+const blobToB64 = (blob) => new Promise((res, rej) => {
+  const r = new FileReader();
+  r.onload = () => res(String(r.result).split(",")[1] || "");
+  r.onerror = () => rej(r.error);
+  r.readAsDataURL(blob);
+});
 
 async function shrink(file) {
   try {
@@ -710,12 +763,13 @@ async function shrink(file) {
     return await new Promise(r => c.toBlob(b => r(b || file), "image/jpeg", 0.85));
   } catch { return file }
 }
+const aiReady = () => NATIVE ? hasKey() : !!sample;
 function setImage(file) {
-  if (!file || !file.type.startsWith("image/")) return;
+  if (!file || !String(file.type).startsWith("image/")) return;
   imgBlob = file;
   const p = $("#preview"); p.src = URL.createObjectURL(file); p.hidden = false;
   $("#drop-text").hidden = true; $("#drop").classList.add("has");
-  $("#go-img").disabled = !sample;
+  $("#go-img").disabled = !aiReady();
 }
 $("#file").addEventListener("change", e => setImage(e.target.files[0]));
 document.addEventListener("paste", e => {
@@ -725,42 +779,88 @@ document.addEventListener("paste", e => {
 $("#drop").addEventListener("dragover", e => e.preventDefault());
 $("#drop").addEventListener("drop", e => { e.preventDefault(); setImage(e.dataTransfer.files[0]) });
 
+async function ask(prompt, { blob, quick, signal, onText }) {
+  if (NATIVE) {
+    const b64 = blob ? await blobToB64(blob) : "";
+    return nativeAsk(prompt, b64, quick, signal);
+  }
+  return sample(prompt, { signal, onText, ...(blob ? { images: [blob] } : {}), ...(quick ? { modelTier: "quick" } : {}) });
+}
 async function run(outEl, prompt, opts, btn) {
   ctl = new AbortController();
   outEl.hidden = false;
   outEl.innerHTML = `<p class="thinking">읽는 중이에요… 보통 10~30초 걸려요.</p>`;
   btn.disabled = true; $("#stop").hidden = btn.id !== "go-img";
   try {
-    const { text } = await sample(prompt, { ...opts, signal: ctl.signal, onText: ({ text }) => { outEl.innerHTML = md(text) } });
+    const { text } = await ask(prompt, { ...opts, signal: ctl.signal, onText: ({ text }) => { outEl.innerHTML = md(text) } });
     outEl.innerHTML = md(text);
   } catch (e) {
-    outEl.innerHTML = (e.text ? md(e.text) : "") + `<div class="note">${esc(errCopy(e))}</div>`;
+    const msg = e && e.code === "native" ? e.message : errCopy(e);
+    outEl.innerHTML = (e && e.text ? md(e.text) : "") + `<div class="note">${esc(msg)}</div>`;
   } finally {
     btn.disabled = false; $("#stop").hidden = true;
-    if (btn.id === "go-img") btn.disabled = !imgBlob;
+    if (btn.id === "go-img") btn.disabled = !imgBlob || !aiReady();
   }
 }
 $("#stop").onclick = () => ctl && ctl.abort();
-$("#go-img").onclick = async () => {
-  if (!imgBlob || !sample) return;
+async function translateImage() {
+  if (!imgBlob || !aiReady()) return;
   const blob = await shrink(imgBlob);
-  run($("#out"), IMG_PROMPT($("#goal").value.trim()), { images: [blob] }, $("#go-img"));
-};
+  run($("#out"), IMG_PROMPT($("#goal").value.trim()), { blob }, $("#go-img"));
+}
+$("#go-img").onclick = translateImage;
 $("#go-txt").onclick = () => {
   const t = $("#txt").value.trim();
-  if (!t || !sample) return;
-  run($("#out-txt"), TXT_PROMPT(t.slice(0, 4000)), { modelTier: "quick" }, $("#go-txt"));
+  if (!t || !aiReady()) return;
+  run($("#out-txt"), TXT_PROMPT(t.slice(0, 4000)), { quick: true }, $("#go-txt"));
+};
+
+/* 안드로이드: API 키 */
+function hasKey() { try { return !!NATIVE && NATIVE.hasKey() } catch { return false } }
+function renderKey() {
+  const k = hasKey();
+  $("#key-panel").hidden = false;
+  $("#key-set").hidden = !k; $("#key-form").hidden = k;
+  $("#go-txt").hidden = !k;
+  $("#go-img").disabled = !imgBlob || !k;
+}
+$("#key-save").onclick = () => {
+  const v = $("#key").value.trim();
+  if (!v) { $("#key").focus(); return }
+  try { NATIVE.setKey(v) } catch {}
+  $("#key").value = ""; renderKey();
+};
+$("#key-change").onclick = () => { $("#key-set").hidden = true; $("#key-form").hidden = false; $("#key").focus() };
+
+/* 안드로이드: 다른 앱에서 "공유"로 넘어온 스크린샷/글자 */
+window.__sharedImage = async (dataUrl) => {
+  try {
+    const blob = await (await fetch(dataUrl)).blob();
+    location.hash = "screen"; show("screen");
+    setImage(blob);
+    if (aiReady()) translateImage();
+  } catch {}
+};
+window.__sharedText = (text) => {
+  location.hash = "screen"; show("screen");
+  $("#txt").value = String(text).slice(0, 4000); renderFound();
+  $("#txt").scrollIntoView({ block: "center" });
 };
 
 function aiOff() {
   $("#ai-off").hidden = false; $("#go-img").disabled = true; $("#go-txt").hidden = true;
 }
 $("#go-txt").hidden = true;
-(async () => {
-  if (!window.claude || typeof window.claude.use !== "function") { aiOff(); return }
-  try { sample = await window.claude.use("sample") } catch { sample = null }
-  if (!sample) { aiOff(); return }
-  $("#go-txt").hidden = false;
-  $("#go-img").disabled = !imgBlob;
-})();
+if (NATIVE) {
+  renderKey();
+  try { NATIVE.pageReady() } catch {}
+} else {
+  (async () => {
+    if (!window.claude || typeof window.claude.use !== "function") { aiOff(); return }
+    try { sample = await window.claude.use("sample") } catch { sample = null }
+    if (!sample) { aiOff(); return }
+    $("#go-txt").hidden = false;
+    $("#go-img").disabled = !imgBlob;
+  })();
+}
 </script>

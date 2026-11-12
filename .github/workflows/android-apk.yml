@@ -5,6 +5,9 @@ on:
     branches: ['**']
     paths-ignore:
       - '**.md'
+      # 중국앱 통역노트는 별도 워크플로(tongyeok-apk.yml)에서 빌드
+      - 'china-app-translator/**'
+      - '.github/workflows/tongyeok-apk.yml'
   workflow_dispatch:
 
 permissions:

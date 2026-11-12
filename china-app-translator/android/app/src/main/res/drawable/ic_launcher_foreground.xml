@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- 말풍선 -->
+    <path android:fillColor="@color/icon_fg"
+        android:pathData="M34,32 h40 a8,8 0 0 1 8,8 v22 a8,8 0 0 1 -8,8 h-22 l-10,9 v-9 h-8 a8,8 0 0 1 -8,-8 v-22 a8,8 0 0 1 8,-8 z" />
+    <!-- 글줄 -->
+    <path android:fillColor="@color/icon_bg" android:pathData="M38,43 h24 v4 h-24 z" />
+    <path android:fillColor="@color/icon_bg" android:pathData="M38,52 h18 v4 h-18 z" />
+    <!-- 도장 -->
+    <path android:fillColor="@color/icon_seal"
+        android:pathData="M64,48 h12 a2,2 0 0 1 2,2 v12 a2,2 0 0 1 -2,2 h-12 a2,2 0 0 1 -2,-2 v-12 a2,2 0 0 1 2,-2 z" />
+</vector>
