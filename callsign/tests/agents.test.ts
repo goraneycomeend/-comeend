@@ -81,6 +81,10 @@ describe('기본 요원 명단', () => {
     }
   });
 
+  it('요원마다 주성분 기본 보이스가 다르다(열 명이 서로 다른 목소리에서 출발한다)', () => {
+    expect(new Set(ROSTER.map(dominantVoice)).size).toBe(ROSTER.length);
+  });
+
   it('역할 4종이 고르게 있다(각 2~3명)', () => {
     for (const role of ROLES) {
       const n = ROSTER.filter((a) => a.role === role).length;

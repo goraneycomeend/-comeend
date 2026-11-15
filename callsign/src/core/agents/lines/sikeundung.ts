@@ -7,7 +7,7 @@ export const SIKEUNDUNG_LINES: AgentLine[] = [
   ko('greeting-1', 'greeting', '어, 왔네. 뭐… 반갑다 치자.'),
   ko('greeting-2', 'greeting', '시큰둥이야. 기대는 하지 마, 실망도 안 하게.'),
   ko('ready-1', 'ready', '준비? 됐지 그럼. 빨리 끝내자, 좀.'),
-  ko('ready-2', 'ready', '<sigh> 가긴 가는데, 이 계획 누가 짰어?'),
+  ko('ready-2', 'ready', '<sigh> 가기는 가는데, 이 계획 누가 짰어?'),
   ko('tactics-1', 'tactics', '거기 아니야. 한 칸 옆. 응, 거기.'),
   ko('clutch-1', 'clutch', '나만 남았어? 아… 귀찮게 됐네.'),
   ko('clutch-2', 'clutch', '조용히 해 봐. 지금 틀린 데 찾는 중이니까.'),

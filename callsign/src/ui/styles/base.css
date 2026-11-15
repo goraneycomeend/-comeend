@@ -16,7 +16,9 @@ html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   background: var(--graphite);
-  transition: --agent 320ms var(--ease);
+  transition:
+    --agent 320ms var(--ease),
+    --agent-ink 320ms var(--ease);
 }
 
 body {

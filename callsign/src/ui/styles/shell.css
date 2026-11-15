@@ -26,7 +26,7 @@
 }
 .skip-link:focus-visible {
   transform: none;
-  outline-color: var(--agent);
+  outline-color: var(--agent-ink);
 }
 
 /* ── 본문 영역 ──────────────────────────────────────────── */
@@ -67,7 +67,7 @@
   left: calc(var(--at) * 100%);
   width: 2px;
   margin-left: -1px;
-  background: var(--agent);
+  background: var(--agent-ink);
   transition: left 360ms var(--ease);
 }
 .dial__needle::before {
@@ -76,7 +76,7 @@
   top: 0;
   left: -3px;
   border: 4px solid transparent;
-  border-top-color: var(--agent);
+  border-top-color: var(--agent-ink);
   border-bottom: 0;
 }
 
@@ -168,7 +168,7 @@
   right: 24%;
   left: 24%;
   height: 2px;
-  background: var(--agent);
+  background: var(--agent-ink);
 }
 .tabbar__item:focus-visible {
   outline-offset: -3px;
@@ -192,7 +192,7 @@
   padding: 0 var(--s2);
 }
 .brand__mark {
-  color: var(--agent);
+  color: var(--agent-ink);
 }
 .brand__name {
   font: 800 1.25rem/1 var(--font-body);
@@ -239,7 +239,7 @@
   bottom: 10px;
   left: 0;
   width: 3px;
-  background: var(--agent);
+  background: var(--agent-ink);
 }
 .sidenav__key {
   margin-left: auto;
@@ -394,6 +394,9 @@
     top: calc(15px + var(--s4));
     /* 창이 낮으면 옆 단 안에서 스크롤한다 */
     max-height: calc(100cqh - 15px - var(--s4) * 2);
+    /* 안에서 스크롤해도 가장자리 버튼의 포커스 테두리가 잘리지 않게 조금 띄운다 */
+    margin: -4px;
+    padding: 4px;
     overflow-y: auto;
     overscroll-behavior: contain;
   }

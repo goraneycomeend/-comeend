@@ -29,6 +29,11 @@
   inherits: true;
   initial-value: #d8a548;
 }
+@property --agent-ink {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #d8a548;
+}
 
 :root {
   color-scheme: dark;
@@ -48,12 +53,13 @@
   --pencil: color-mix(in oklab, var(--agent) 9%, #9da2a5);
 
   /* 요원 색에서 나온 값들 */
-  /* 어두운 바탕 위 글자로 써도 읽히게 밝힌 요원 색 (App 이 계산해 넣는다) */
+  /* 어두운 바탕 위에서도 또렷하게 밝힌 요원 색 (App 이 계산해 넣는다).
+     글자·선·표시등·막대처럼 바탕 위에 놓이는 것은 전부 이 색을 쓴다. --agent 그대로는 '칠한 면'에만 쓴다 */
   --agent-ink: var(--agent);
   /* 요원 색으로 칠한 면 위에 올리는 글자색 (App 이 계산해 넣는다) */
   --on-agent: #101213;
-  --agent-wash: color-mix(in oklab, var(--agent) 13%, var(--graphite));
-  --agent-line: color-mix(in oklab, var(--agent) 55%, var(--rule));
+  --agent-wash: color-mix(in oklab, var(--agent-ink) 13%, var(--graphite));
+  --agent-line: color-mix(in oklab, var(--agent-ink) 55%, var(--rule));
   --slate-hover: color-mix(in oklab, var(--paper) 5%, var(--slate));
   --sunken: color-mix(in oklab, #000 28%, var(--graphite));
 

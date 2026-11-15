@@ -223,6 +223,30 @@ test.describe('폰 폭 (390×844)', () => {
     await expect(chip).toBeFocused();
   });
 
+  test('저장소를 못 쓰는 환경(막힌 프레임)에서도 그대로 돈다', async ({ page }) => {
+    const errors = collectErrors(page);
+    await page.addInitScript(() => {
+      Object.defineProperty(window, 'localStorage', {
+        get() {
+          throw new DOMException('막힘', 'SecurityError');
+        },
+      });
+    });
+    await page.goto('./');
+    await page.locator(`.agent-card[data-agent="${SECOND.id}"]`).click();
+    const sheet = page.getByRole('dialog', { name: SECOND.callsign });
+    await expect(sheet).toBeVisible();
+    await sheet.getByRole('button', { name: '닫기' }).click();
+    await expect(sheet).toBeHidden();
+    await expect(page.getByRole('button', { name: /^요원 바꾸기/ })).toContainText(SECOND.callsign);
+    await page.getByRole('button', { name: '정보' }).click();
+    await expect(page.locator('.shell')).toHaveAttribute('data-route', 'about');
+    // 남길 곳이 없으니 새로 고치면 첫 요원으로 돌아간다. 그래도 앱은 뜬다
+    await page.reload();
+    await expect(page.getByRole('button', { name: /^요원 바꾸기/ })).toContainText(FIRST.callsign);
+    expect(errors).toEqual([]);
+  });
+
   test('정보 화면에 고지와 수칙이 있다', async ({ page }) => {
     await page.goto('./#about');
     const main = page.getByRole('main');

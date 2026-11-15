@@ -14,7 +14,7 @@ export const NEUNGCHEONG_LINES: AgentLine[] = [
   ko('banter-1', 'banter', '방금 그건 반품 안 됩니다? 이미 뜯으셨어요.'),
   ko('banter-2', 'banter', '제 칭찬은 공짜예요. <laugh> 그래서 막 드리는 거고요.'),
   ko('victory-1', 'victory', '매진입니다, 매진! 오늘 준비한 승리, 다 나갔어요.'),
-  ko('victory-2', 'victory', '이겼죠? 제가 뭐랬어요. 된다고 했잖아요.'),
+  ko('victory-2', 'victory', '이겼죠? 제가 뭐라 그랬어요. 된다고 했잖아요.'),
   ko('comfort-1', 'comfort', '에이, 괜찮아요. 다음 방송에서 만회하면 되죠.'),
   ko('comfort-2', 'comfort', '진 건 환불이 안 돼요. 대신 다음 판은 덤으로 드릴게요.'),
 ];

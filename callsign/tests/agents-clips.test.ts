@@ -34,7 +34,7 @@ describe('clipKey', () => {
     expect(clipKey({ ...voice, blend: { ...voice.blend } }, { ...line })).toBe(key);
     // 다른 실행·다른 기기에서도 같아야 하므로 값을 못 박아 둔다
     expect(clipKey({ blend: { F1: 1 }, speed: 1, fx: { ...NEUTRAL_FX } }, { ...line, text: '가자.' })).toBe(
-      'c5a27ae5e8d0cb0f',
+      '8717f0ec8870e525',
     );
   });
 

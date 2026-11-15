@@ -97,7 +97,7 @@ export function WaveformView({ audio, position, height = 72, onSeek, className }
       if (!colors.current || now - colors.current.at > 400) {
         colors.current = {
           at: now,
-          played: resolveColor(pr, ctx, 'var(--agent)', '#d8a548'),
+          played: resolveColor(pr, ctx, 'var(--agent-ink)', '#d8a548'),
           rest: resolveColor(pr, ctx, 'var(--pencil)', '#9da2a5'),
           head: resolveColor(pr, ctx, 'var(--paper)', '#e9eae6'),
         };

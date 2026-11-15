@@ -2,8 +2,8 @@
 
 /* 이 클래스가 붙은 요소는 자기 --agent 로 파생색을 다시 계산한다(카드 하나만 다른 요원 색일 때) */
 .agent-scope {
-  --agent-wash: color-mix(in oklab, var(--agent) 13%, var(--graphite));
-  --agent-line: color-mix(in oklab, var(--agent) 55%, var(--rule));
+  --agent-wash: color-mix(in oklab, var(--agent-ink) 13%, var(--graphite));
+  --agent-line: color-mix(in oklab, var(--agent-ink) 55%, var(--rule));
 }
 
 @keyframes spin {
@@ -88,6 +88,7 @@
   width: 100%;
 }
 .btn--primary {
+  border-color: var(--agent-line);
   background: var(--agent);
   color: var(--on-agent);
 }
@@ -185,7 +186,7 @@
   color: var(--paper);
 }
 .chip--on .chip__face::before {
-  background: var(--agent);
+  background: var(--agent-ink);
 }
 .chip:disabled {
   opacity: 0.45;
@@ -277,7 +278,7 @@
 }
 .switch--on .switch__thumb {
   transform: translateX(18px);
-  background: var(--agent);
+  background: var(--agent-ink);
 }
 
 /* ── 붙은 버튼 줄 ───────────────────────────────────────── */
@@ -318,7 +319,7 @@
 .segmented__item--on {
   background: var(--agent-wash);
   color: var(--paper);
-  box-shadow: inset 0 -2px 0 var(--agent);
+  box-shadow: inset 0 -2px 0 var(--agent-ink);
 }
 .segmented__item:disabled {
   opacity: 0.4;
@@ -348,6 +349,7 @@
 .play-btn--solid {
   background: var(--agent);
   color: var(--on-agent);
+  box-shadow: inset 0 0 0 1px var(--agent-line);
 }
 .play-btn--solid:hover:not(:disabled) {
   background: color-mix(in oklab, var(--agent) 86%, #fff);
@@ -359,7 +361,7 @@
 .play-btn--outline:hover:not(:disabled),
 .play-btn--outline.play-btn--active {
   background: var(--agent-wash);
-  border-color: var(--agent);
+  border-color: var(--agent-ink);
 }
 .play-btn[data-phase='playing'] {
   animation: pulse-ring 1.4s ease-out infinite;
@@ -411,7 +413,7 @@
   background: linear-gradient(
     90deg,
     var(--rule) 0 calc(var(--from) * 100%),
-    var(--agent) calc(var(--from) * 100%) calc(var(--to) * 100%),
+    var(--agent-ink) calc(var(--from) * 100%) calc(var(--to) * 100%),
     var(--rule) calc(var(--to) * 100%) 100%
   );
 }
@@ -451,7 +453,7 @@
   border: 2px solid var(--graphite);
   border-radius: var(--r-s);
   background: var(--paper);
-  box-shadow: 0 0 0 1px var(--agent);
+  box-shadow: 0 0 0 1px var(--agent-ink);
   appearance: none;
   -webkit-appearance: none;
 }
@@ -465,19 +467,19 @@
   border: 2px solid var(--graphite);
   border-radius: var(--r-s);
   background: var(--paper);
-  box-shadow: 0 0 0 1px var(--agent);
+  box-shadow: 0 0 0 1px var(--agent-ink);
 }
 .slider__input:focus-visible {
   outline: none;
 }
 .slider__input:focus-visible::-webkit-slider-thumb {
   box-shadow:
-    0 0 0 1px var(--agent),
+    0 0 0 1px var(--agent-ink),
     0 0 0 4px var(--focus);
 }
 .slider__input:focus-visible::-moz-range-thumb {
   box-shadow:
-    0 0 0 1px var(--agent),
+    0 0 0 1px var(--agent-ink),
     0 0 0 4px var(--focus);
 }
 .slider__desc {
@@ -509,7 +511,7 @@
   width: 6px;
   height: 6px;
   margin-right: var(--s2);
-  background: var(--agent);
+  background: var(--agent-ink);
   vertical-align: 1px;
 }
 .panel__hint {
@@ -537,7 +539,7 @@
 }
 
 .notice {
-  --tone: var(--agent);
+  --tone: var(--agent-ink);
   display: flex;
   align-items: flex-start;
   gap: 10px;
@@ -591,7 +593,7 @@
 }
 .bar__fill {
   height: 100%;
-  background: var(--agent);
+  background: var(--agent-ink);
   transform-origin: left center;
   transition: transform 200ms linear;
 }
@@ -617,7 +619,7 @@
 .meter__fill {
   position: absolute;
   inset: 2px;
-  background: var(--agent);
+  background: var(--agent-ink);
   /* 칸 무늬는 그대로 두고, 레벨만큼만 드러낸다 */
   clip-path: inset(0 calc((1 - var(--level)) * 100%) 0 0);
   transition: clip-path 70ms linear;
@@ -659,7 +661,7 @@
   gap: var(--s3);
   padding: var(--s4);
   border: var(--hair) solid var(--rule);
-  border-left: 3px solid var(--agent);
+  border-left: 3px solid var(--agent-ink);
   border-radius: 0 var(--r-s) var(--r-s) 0;
   background: var(--slate);
   justify-items: start;
@@ -741,7 +743,7 @@
   stroke-width: 1;
 }
 .emblem__spoke {
-  stroke: var(--agent);
+  stroke: var(--agent-ink);
 }
 .emblem__spoke--bright {
   stroke: var(--paper);
@@ -750,7 +752,7 @@
   fill: var(--paper);
 }
 .emblem__mark {
-  fill: var(--agent);
+  fill: var(--agent-ink);
 }
 .emblem__mark--bright {
   fill: var(--paper);
@@ -786,7 +788,7 @@
   bottom: 0;
   left: 0;
   width: 3px;
-  background: var(--agent);
+  background: var(--agent-ink);
   opacity: 0.5;
   transition: opacity var(--dur) var(--ease);
 }
@@ -795,7 +797,7 @@
   background: var(--agent-wash);
 }
 .agent-card--on {
-  border-color: var(--agent);
+  border-color: var(--agent-ink);
   background: var(--agent-wash);
 }
 .agent-card--on::before,
@@ -1057,4 +1059,128 @@
     flex-direction: column-reverse;
     align-items: flex-start;
   }
+}
+
+/* ── 글 입력 ────────────────────────────────────────────── */
+/* <label class="field"><span class="field-label">이름</span><input class="text-input" /><span class="field-hint">…</span></label> */
+.field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.field-hint {
+  font: var(--t-small);
+  color: var(--pencil);
+}
+.text-input {
+  display: block;
+  width: 100%;
+  min-height: var(--tap);
+  padding: 10px var(--s3);
+  border: var(--hair) solid var(--rule);
+  border-radius: var(--r-s);
+  background: var(--sunken);
+  color: var(--paper);
+  font: var(--t-body);
+  transition: border-color var(--dur) var(--ease);
+}
+textarea.text-input {
+  min-height: 132px;
+  resize: vertical;
+  line-height: 1.6;
+}
+.text-input::placeholder {
+  color: color-mix(in oklab, var(--pencil) 70%, transparent);
+}
+.text-input:hover:not(:disabled) {
+  border-color: var(--agent-line);
+}
+.text-input:focus-visible {
+  border-color: var(--agent-ink);
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+.text-input:disabled {
+  opacity: 0.5;
+}
+.text-input[aria-invalid='true'] {
+  border-color: var(--signal-red);
+}
+
+/* 파일을 끌어다 놓는 자리. 끌어온 동안 .dropzone--over 를 붙인다 */
+.dropzone {
+  display: grid;
+  gap: var(--s2);
+  justify-items: center;
+  padding: var(--s5) var(--s4);
+  border: var(--hair) dashed var(--rule);
+  border-radius: var(--r-s);
+  background: var(--sunken);
+  color: var(--pencil);
+  font: var(--t-small);
+  text-align: center;
+  transition:
+    background-color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease);
+}
+.dropzone--over {
+  border-color: var(--agent-ink);
+  background: var(--agent-wash);
+  color: var(--paper);
+}
+
+/* ── 기록 줄 ────────────────────────────────────────────── */
+/* 대사 목록, 녹음 목록, 최근 기록처럼 "줄"로 쌓이는 것들의 공통 모양.
+   <ul class="ledger"><li class="ledger__row">[재생] <div class="ledger__main">…</div> <div class="ledger__actions">…</div></li></ul> */
+.ledger {
+  display: grid;
+  border-top: var(--hair) solid var(--rule);
+}
+.ledger__row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  min-height: 60px;
+  padding: var(--s2) var(--s1) var(--s2) var(--s2);
+  border-bottom: var(--hair) solid var(--rule);
+  transition: background-color var(--dur) var(--ease);
+}
+.ledger__row:hover {
+  background: color-mix(in oklab, var(--paper) 3%, transparent);
+}
+/* 지금 소리가 나는 줄: 왼쪽에 채널 띠 */
+.ledger__row--active {
+  background: var(--agent-wash);
+}
+.ledger__row--active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 3px;
+  background: var(--agent-ink);
+}
+.ledger__main {
+  display: grid;
+  flex: 1 1 0;
+  min-width: 0;
+  gap: 2px;
+}
+.ledger__title {
+  font: 600 0.9375rem/1.5 var(--font-body);
+}
+.ledger__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px var(--s2);
+  font: var(--t-small);
+  color: var(--pencil);
+}
+.ledger__actions {
+  display: flex;
+  flex: none;
+  align-items: center;
 }

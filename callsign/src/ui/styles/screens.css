@@ -68,7 +68,7 @@
 }
 .detail__tagline {
   padding-left: var(--s3);
-  border-left: 3px solid var(--agent);
+  border-left: 3px solid var(--agent-ink);
 }
 .detail__bio {
   color: var(--pencil);
@@ -178,7 +178,7 @@
   left: 0;
   width: 6px;
   height: 6px;
-  background: var(--agent);
+  background: var(--agent-ink);
 }
 .kinds {
   display: grid;

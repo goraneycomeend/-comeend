@@ -115,6 +115,11 @@ export function isEngineReady(): boolean {
   return engine.status === 'ready';
 }
 
+/** 합성을 맡겨도 되는 상태인지: 준비됐거나, 불러오는 중(다 불러오면 이어서 만든다) */
+function engineUsable(): boolean {
+  return engine.status === 'ready' || engine.status === 'loading';
+}
+
 /**
  * AI 음성 엔진을 불러온다(모델 약 145MB 를 받는다). 사용자가 버튼을 눌렀을 때만 부를 것.
  * 진행 상황은 스토어의 `engine` 에 반영된다. 이미 준비됐으면 바로 끝난다.
@@ -294,7 +299,8 @@ function lineDry(agent: AgentDef, line: AgentLine, signal?: AbortSignal): Promis
           // 클립을 못 읽으면 엔진으로 만들어 본다
         }
       }
-      if (engine.status !== 'ready') throw new EngineNeededError();
+      // 불러오는 중이면 엔진이 다 불러올 때까지 기다렸다가 만든다
+      if (!engineUsable()) throw new EngineNeededError();
       // 클립을 만들 때와 같은 요청(같은 시드)이라, 언제 만들어도 같은 연기가 나온다
       const request = clipRequest(agent.voice, line, lineTake(agent.id, line.id));
       return finishSpeech(await engine.synthesize(request, { signal: controller.signal }));
@@ -455,7 +461,7 @@ let resultSeq = 0;
 export async function speakText(agent: AgentDef, text: string, opts: SpeakTextOptions = {}): Promise<SpokenResult> {
   const clean = text.trim();
   if (!clean) throw new VoiceError('empty-text', '말할 내용을 적어 주세요.');
-  if (engine.status !== 'ready') throw new EngineNeededError('먼저 AI 음성 엔진을 불러와 주세요.');
+  if (!engineUsable()) throw new EngineNeededError('먼저 AI 음성 엔진을 불러와 주세요.');
 
   const lang = !opts.lang || opts.lang === 'auto' ? guessLang(clean) : opts.lang;
   const rate = Number.isFinite(opts.rate) ? (opts.rate as number) : 1;

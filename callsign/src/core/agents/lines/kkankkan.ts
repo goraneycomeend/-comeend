@@ -3,7 +3,7 @@ import type { AgentLine } from '../../types.ts';
 import { SAMPLE_LINE_ID, ko } from '../line.ts';
 
 export const KKANKKAN_LINES: AgentLine[] = [
-  ko(SAMPLE_LINE_ID, 'banter', '방금 그 진입, 불합격. 다시 해, 처음부터.'),
+  ko(SAMPLE_LINE_ID, 'banter', '방금 그 진입, 불합격. 처음부터 다시 해.'),
   ko('greeting-1', 'greeting', '왔으면 장비부터 봐. 인사는 그다음이야.'),
   ko('greeting-2', 'greeting', '깐깐이야. 별명 아니고 평가야. 나도 인정했어.'),
   ko('ready-1', 'ready', '점검 끝. 이상 없음. 이제 가도 돼.'),

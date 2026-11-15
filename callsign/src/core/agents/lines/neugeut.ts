@@ -12,7 +12,7 @@ export const NEUGEUT_LINES: AgentLine[] = [
   ko('clutch-1', 'clutch', '허, 나만 남았구먼. 뭐, 조용해서 좋네.'),
   ko('clutch-2', 'clutch', '<breath> 급할 거 없지. 한 알씩 따면 되는 거야.'),
   ko('banter-1', 'banter', '젊은 사람이 뭘 그리 뛰나. 무릎 아껴 쓰게.'),
-  ko('banter-2', 'banter', '<laugh> 그 솜씨로는 사과 한 알도 못 따겠구먼.'),
+  ko('banter-2', 'banter', '<laugh> 그 솜씨로는 사과 농사도 어렵겠구먼.'),
   ko('victory-1', 'victory', '허허, 됐네. 올해 농사는 풍년이야.'),
   ko('victory-2', 'victory', '이겼구먼. 자, 다들 앉아서 물이나 한 잔 하세.'),
   ko('comfort-1', 'comfort', '괜찮네. 한 해 흉년 들었다고 나무를 베진 않아.'),

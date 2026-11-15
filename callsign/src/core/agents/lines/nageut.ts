@@ -6,7 +6,7 @@ export const NAGEUT_LINES: AgentLine[] = [
   ko(SAMPLE_LINE_ID, 'comfort', '괜찮아요. 제 목소리만 따라오세요, 천천히.'),
   ko('greeting-1', 'greeting', '어서 와요. 오느라 고생했죠? 숨부터 돌려요.'),
   ko('greeting-2', 'greeting', '나긋이에요. 필요하면 불러요, 듣고 있을게요.'),
-  ko('ready-1', 'ready', '준비됐어요. 다들 물은 마셨죠? 그럼 가요.'),
+  ko('ready-1', 'ready', '준비됐어요. 다들 물 마셨죠? 그럼 가요.'),
   ko('ready-2', 'ready', '서두르지 않아도 돼요. 제가 뒤에서 보고 있어요.'),
   ko('tactics-1', 'tactics', '지금 위치만 말해 줘요. 나머지는 제가 맞출게요.'),
   ko('tactics-2', 'tactics', '한 사람씩 불러 볼게요. 대답만 해 줘요.'),
