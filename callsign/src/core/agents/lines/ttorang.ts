@@ -13,7 +13,7 @@ export const TTORANG_LINES: AgentLine[] = [
   ko('clutch-2', 'clutch', '배운 대로만 하겠습니다. 하나씩, 침착하게.'),
   ko('banter-1', 'banter', '선배님, 방금 그건 좀 멋있었습니다. 진짜로요.'),
   ko('banter-2', 'banter', '아침 방송 때보다 떨립니다. 그땐 대본이 있었거든요.'),
-  ko('victory-1', 'victory', '이겼습니다! 와, 진짜 이겼습니다, 우리가!'),
+  ko('victory-1', 'victory', '이겼습니다! 와, 저희가 진짜 이겼습니다.'),
   ko('victory-2', 'victory', '승리 보고드립니다! 아, 다들 이미 아십니까?'),
   ko('comfort-1', 'comfort', '괜찮습니다! 저는 매일 틀리는데도 멀쩡합니다.'),
   ko('comfort-2', 'comfort', '선배님, 물 드십시오. 다음엔 제가 더 잘 보겠습니다.'),

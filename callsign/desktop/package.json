@@ -1,0 +1,20 @@
+{
+  "name": "callsign-desktop",
+  "productName": "Callsign",
+  "version": "0.1.0",
+  "private": true,
+  "description": "콜사인 PC 앱 — 오리지널 요원 AI 보이스 스튜디오 (전부 이 PC 안에서 동작)",
+  "author": "Callsign",
+  "main": "src/main.js",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "check:version": "node scripts/check-version.mjs",
+    "test": "node --test test/"
+  },
+  "devDependencies": {
+    "electron": "45.3.2",
+    "electron-builder": "26.18.0"
+  }
+}
