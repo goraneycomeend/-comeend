@@ -119,7 +119,15 @@ export function safeFilename(name: string): string {
 /** 파일 이름 조각을 이어 붙인다. 예) audioFilename(['하루', '목표 지점 확보'], 'wav') → '콜사인_하루_목표-지점-확보.wav' */
 export function audioFilename(parts: string[], ext: string): string {
   const body = parts
-    .map((p) => p.replace(/<[^>]*>/g, ' ').trim().slice(0, 24).trim())
+    // 표현 태그와 문장부호는 빼고, 너무 길면 앞부분만 쓴다
+    .map((p) =>
+      p
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/[.,!?…~'"“”‘’()[\]{}]/g, ' ')
+        .trim()
+        .slice(0, 24)
+        .trim(),
+    )
     .filter((p) => p.length > 0)
     .map((p) => p.replace(/\s+/g, '-'))
     .join('_');

@@ -152,6 +152,15 @@ export function resultPlayId(resultId: string): string {
 
 /** 요청 순번. 새 요청이 들어오면 올라가고, 예전 요청은 자기 순번이 아니면 물러난다 */
 let ticket = 0;
+/** 준비 중인 대사 재생의 취소 손잡이. 새 요청이 들어오면 앞의 준비 작업을 그만두게 한다 */
+let preparing: AbortController | null = null;
+
+/** 새 재생 요청을 시작한다: 준비 중이던 것을 그만두게 하고 새 순번을 받는다 */
+function nextTicket(): number {
+  preparing?.abort();
+  preparing = null;
+  return ++ticket;
+}
 /** Space 로 다시 틀 수 있게 마지막으로 튼 소리를 기억한다 */
 let lastPlayed: { id: string; audio: PcmAudio } | null = null;
 
@@ -185,14 +194,14 @@ function startPlayback(myTicket: number, id: string, audio: PcmAudio, opts: Play
  * (`usePlayPhase(id)` 로 읽는다).
  */
 export function playAudio(id: string, audio: PcmAudio, opts: PlayAudioOptions = {}): Playback {
-  const myTicket = ++ticket;
+  const myTicket = nextTicket();
   void resumeAudio();
   return startPlayback(myTicket, id, audio, opts);
 }
 
 /** 지금 나는 소리(와 준비 중인 재생)를 멈춘다 */
 export function stopPlayback(): void {
-  ticket++;
+  nextTicket();
   stopAll();
   useAppStore.getState().setPlayback(null);
 }
@@ -248,51 +257,83 @@ class AudioCache {
 
 const dryCache = new AudioCache(24);
 const wetCache = new AudioCache(24);
-/** 같은 원음을 동시에 두 번 받지 않게 진행 중인 작업을 기억한다 */
-const dryPending = new Map<string, Promise<PcmAudio>>();
+/** 진행 중인 원음 작업. 같은 원음을 동시에 두 번 받거나 만들지 않게 함께 기다린다 */
+interface DryJob {
+  promise: Promise<PcmAudio>;
+  controller: AbortController;
+  /** 이 결과를 기다리는 요청 수. 0 이 되면 작업을 그만둔다 */
+  waiters: number;
+}
+const dryPending = new Map<string, DryJob>();
 
-async function fetchClip(url: string): Promise<PcmAudio> {
-  const res = await fetch(url);
+async function fetchClip(url: string, signal: AbortSignal): Promise<PcmAudio> {
+  const res = await fetch(url, { signal });
   if (!res.ok) throw new Error(`클립을 받지 못했어요 (${res.status})`);
   return decodeAudio(await res.arrayBuffer());
 }
 
-/** 대사의 원음(효과 전). 클립 → 엔진 합성 순으로 구한다 */
-async function lineDry(agent: AgentDef, line: AgentLine): Promise<PcmAudio> {
+/**
+ * 대사의 원음(효과 전). 클립 → 엔진 합성 순으로 구한다.
+ * `signal` 로 "나는 그만 기다린다"를 알리면, 더 기다리는 요청이 없을 때 작업 자체를 멈춘다.
+ */
+function lineDry(agent: AgentDef, line: AgentLine, signal?: AbortSignal): Promise<PcmAudio> {
   const key = `${agent.id}/${line.id}@${clipKeyOf(agent.voice, line)}`;
   const cached = dryCache.get(key);
-  if (cached) return cached;
-  const running = dryPending.get(key);
-  if (running) return running;
+  if (cached) return Promise.resolve(cached);
 
-  const job = (async (): Promise<PcmAudio> => {
-    const clip = await findClip(agent, line);
-    if (clip) {
-      try {
-        return await fetchClip(clip.url);
-      } catch {
-        // 클립을 못 읽으면 엔진으로 만들어 본다
+  let job = dryPending.get(key);
+  if (!job) {
+    const controller = new AbortController();
+    const promise = (async (): Promise<PcmAudio> => {
+      const clip = await findClip(agent, line);
+      if (clip) {
+        try {
+          return await fetchClip(clip.url, controller.signal);
+        } catch (err) {
+          if (controller.signal.aborted) throw err;
+          // 클립을 못 읽으면 엔진으로 만들어 본다
+        }
       }
-    }
-    if (engine.status !== 'ready') throw new EngineNeededError();
-    // 클립을 만들 때와 같은 요청(같은 시드)이라, 언제 만들어도 같은 연기가 나온다
-    const raw = await engine.synthesize(clipRequest(agent.voice, line, lineTake(agent.id, line.id)));
-    return finishSpeech(raw);
-  })();
-
-  dryPending.set(key, job);
-  try {
-    const dry = await job;
-    dryCache.set(key, dry);
-    return dry;
-  } finally {
-    dryPending.delete(key);
+      if (engine.status !== 'ready') throw new EngineNeededError();
+      // 클립을 만들 때와 같은 요청(같은 시드)이라, 언제 만들어도 같은 연기가 나온다
+      const request = clipRequest(agent.voice, line, lineTake(agent.id, line.id));
+      return finishSpeech(await engine.synthesize(request, { signal: controller.signal }));
+    })();
+    const created: DryJob = { promise, controller, waiters: 0 };
+    job = created;
+    dryPending.set(key, created);
+    promise
+      .then(
+        (dry) => dryCache.set(key, dry),
+        () => undefined,
+      )
+      .finally(() => {
+        if (dryPending.get(key) === created) dryPending.delete(key);
+      });
   }
+
+  const joined = job;
+  joined.waiters++;
+  if (signal) {
+    const leave = (): void => {
+      joined.waiters--;
+      if (joined.waiters <= 0) joined.controller.abort();
+    };
+    if (signal.aborted) leave();
+    else {
+      signal.addEventListener('abort', leave, { once: true });
+      const detach = (): void => signal.removeEventListener('abort', leave);
+      joined.promise.then(detach, detach);
+    }
+  }
+  return joined.promise;
 }
 
 export interface LineOptions {
   /** 무전 효과를 입힐지. 기본 false */
   radio?: boolean;
+  /** 취소 신호. 기다리는 곳이 더 없으면 받아 오거나 만드는 일도 멈춘다 */
+  signal?: AbortSignal;
 }
 
 /**
@@ -305,7 +346,7 @@ export async function renderLine(agent: AgentDef, line: AgentLine, opts: LineOpt
     const key = `${agent.id}/${line.id}@${clipKeyOf(agent.voice, line)}|${fxSignature(fx)}`;
     const cached = wetCache.get(key);
     if (cached) return cached;
-    const dry = await lineDry(agent, line);
+    const dry = await lineDry(agent, line, opts.signal);
     const wet = isNeutralFx(fx) ? dry : await renderVoice(dry, fx);
     wetCache.set(key, wet);
     return wet;
@@ -327,19 +368,29 @@ export interface SpeakLineOptions extends LineOptions, PlayAudioOptions {}
  * - 준비하는 사이 다른 재생 요청이 들어오면 code 'superseded' 인 VoiceError (알릴 필요 없음)
  */
 export async function speakLine(agent: AgentDef, line: AgentLine, opts: SpeakLineOptions = {}): Promise<Playback> {
-  const myTicket = ++ticket;
+  const myTicket = nextTicket();
+  const superseded = (): VoiceError => new VoiceError('superseded', '다른 소리를 트느라 이 재생은 건너뛰었어요.');
+  // 다음 요청이 들어오면(또는 부른 쪽이 취소하면) 이 준비 작업을 그만둔다
+  const abort = new AbortController();
+  preparing = abort;
+  if (opts.signal?.aborted) abort.abort();
+  else opts.signal?.addEventListener('abort', () => abort.abort(), { once: true });
+
   const id = linePlayId(agent.id, line.id);
   stopAll();
   useAppStore.getState().setPlayback({ id, phase: 'preparing' });
   void resumeAudio();
   let audio: PcmAudio;
   try {
-    audio = await renderLine(agent, line, opts);
+    audio = await renderLine(agent, line, { radio: opts.radio, signal: abort.signal });
   } catch (err) {
-    if (ticket === myTicket) useAppStore.getState().setPlayback(null);
+    if (ticket !== myTicket) throw superseded();
+    useAppStore.getState().setPlayback(null);
     throw toVoiceError(err);
+  } finally {
+    if (preparing === abort) preparing = null;
   }
-  if (ticket !== myTicket) throw new VoiceError('superseded', '다른 소리를 트느라 이 재생은 건너뛰었어요.');
+  if (ticket !== myTicket) throw superseded();
   return startPlayback(myTicket, id, audio, opts);
 }
 
