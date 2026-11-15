@@ -400,8 +400,13 @@ test('셸: 창이 뜨고, 격리가 켜지고, 파일을 바르게 내주고, �
     location.href = 'https://example.invalid/';
   });
   await page.waitForTimeout(700);
-  expect(page.url().startsWith(`${APP_ORIGIN}/`), `이동이 막혀야 한다: ${page.url()}`).toBe(true);
-  await expect(page.locator('#root')).toContainText('콜사인');
+  // (막힌 이동 뒤에는 Playwright 의 locator 가 "이동이 끝나기"를 기다리며 멈춘다. 그래서 화면 안에서 직접 확인한다)
+  const afterNavigation = await page.evaluate(() => ({
+    href: location.href,
+    appStillThere: (document.querySelector('#root')?.textContent ?? '').includes('콜사인'),
+  }));
+  expect(afterNavigation.href.startsWith(`${APP_ORIGIN}/`), `이동이 막혀야 한다: ${afterNavigation.href}`).toBe(true);
+  expect(afterNavigation.appStillThere, '화면이 그대로 남아 있어야 한다').toBe(true);
   expect(await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().length)).toBe(1);
 
   // 주 프로세스가 직접 막았다는 기록
@@ -452,6 +457,9 @@ test('권한: 마이크(소리)만 허용하고 카메라·화면 캡처는 거�
     const outputs = (await navigator.mediaDevices.enumerateDevices()).filter((device) => device.kind === 'audiooutput');
     const target = outputs.find((device) => device.deviceId !== '' && device.deviceId !== 'default' && device.deviceId !== 'communications');
     const context = new AudioContext();
+    // 첫 클릭 없이도 소리가 나야 한다: 만들자마자(늦어도 2초 안에) running
+    for (let i = 0; i < 20 && context.state !== 'running'; i++) await new Promise((resolve) => setTimeout(resolve, 100));
+    const contextState = context.state;
     const sinkCapable = typeof (context as unknown as { setSinkId?: unknown }).setSinkId === 'function';
     let sink = 'no extra output device';
     if (target && sinkCapable) {
@@ -460,7 +468,6 @@ test('권한: 마이크(소리)만 허용하고 카메라·화면 캡처는 거�
         (error: Error) => error.name,
       );
     }
-    const contextState = context.state;
     await context.close();
 
     return {
@@ -487,8 +494,7 @@ test('권한: 마이크(소리)만 허용하고 카메라·화면 캡처는 거�
   expect(result.outputLabels.every((label) => label !== ''), '출력 장치 이름이 보여야 한다').toBe(true);
   expect(['ok', 'no extra output device']).toContain(result.sink);
   if (result.sink !== 'ok') testInfo.annotations.push({ type: '참고', description: '기본 장치 말고 다른 출력 장치가 없어 setSinkId 는 확인하지 못함' });
-  // 첫 클릭 없이도 소리를 낼 수 있어야 한다
-  expect(result.contextState).toBe('running');
+  expect(result.contextState, '첫 클릭 없이도 AudioContext 가 돌아야 한다').toBe('running');
 
   const log = session.logText();
   expect(log).toContain('permission request denied: media');
