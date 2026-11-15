@@ -1,4 +1,4 @@
-// 걸걸 — 새벽 수산시장 경매사 출신. 호탕하고 거침없는 반말, 밥 챙기는 말버릇.
+// 걸걸 — 새벽 수산시장 경매사 출신. 목청 좋고 거침없는 반말, 밥 챙기는 말버릇.
 import type { AgentLine } from '../../types.ts';
 import { SAMPLE_LINE_ID, ko } from '../line.ts';
 
@@ -12,7 +12,7 @@ export const GEOLGEOL_LINES: AgentLine[] = [
   ko('clutch-1', 'clutch', '혼자 남았다고? <laugh> 낙찰이다, 낙찰. 내 거야.'),
   ko('clutch-2', 'clutch', '하, 숨 좀 고르고. 좋아, 딱 한 번만 더.'),
   ko('banter-1', 'banter', '다들 밥은 먹었지? 난 빈속으론 못 뛴다.'),
-  ko('banter-2', 'banter', '목이 왜 이러냐고? 새벽 장사 십 년 해 봐라.'),
+  ko('banter-2', 'banter', '목청이 왜 이리 크냐고? 새벽 장사 십 년 해 봐라.'),
   ko('victory-1', 'victory', '이겼다! 오늘 저녁은 내가 산다, 다 따라와!'),
   ko('victory-2', 'victory', '<laugh> 거 봐라, 밀어붙이니까 되잖아!'),
   ko('comfort-1', 'comfort', '야, 고개 들어. 오늘 못 판 건 내일 팔면 돼.'),

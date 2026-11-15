@@ -32,6 +32,11 @@ const MAX_SECONDS = 15;
 const MIN_SEC_PER_CHAR = 0.08;
 const MAX_SEC_PER_CHAR = 0.45;
 
+/** 잘못 쓴 옵션처럼, 설명만 보여 주면 되는 오류 */
+class UsageError extends Error {}
+
+const USAGE = '사용법: node scripts/render-clips.mjs [--force] [--check] [--only <요원 id>[/<대사 id>]] [--threads N]';
+
 function parseArgs(argv) {
   const args = { force: false, check: false, only: null, threads: 2 };
   for (let i = 0; i < argv.length; i++) {
@@ -41,7 +46,7 @@ function parseArgs(argv) {
     else if (a === '--only') args.only = argv[++i] ?? null;
     else if (a === '--threads') args.threads = Math.max(1, Number.parseInt(argv[++i] ?? '2', 10) || 2);
     else if (a === '--help' || a === '-h') args.help = true;
-    else throw new Error(`모르는 옵션이에요: ${a}`);
+    else throw new UsageError(`모르는 옵션이에요: ${a}`);
   }
   return args;
 }
@@ -137,7 +142,7 @@ async function pruneFiles(keep) {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help) {
-    console.log('사용법: node scripts/render-clips.mjs [--force] [--check] [--only <요원 id>[/<대사 id>]] [--threads N]');
+    console.log(USAGE);
     return 0;
   }
 
@@ -290,7 +295,8 @@ main().then(
     process.exitCode = code;
   },
   (err) => {
-    console.error(err instanceof Error ? (err.stack ?? err.message) : err);
+    if (err instanceof UsageError) console.error(`${err.message}\n${USAGE}`);
+    else console.error(err instanceof Error ? (err.stack ?? err.message) : err);
     process.exitCode = 1;
   },
 );

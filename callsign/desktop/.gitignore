@@ -1,0 +1,8 @@
+# 내려받는 것
+node_modules/
+
+# 만들어지는 것: 포장 결과물, 점검 결과
+release/
+test-results/
+playwright-report/
+*.log

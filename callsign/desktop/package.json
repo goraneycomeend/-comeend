@@ -10,8 +10,14 @@
     "node": ">=22.12.0"
   },
   "scripts": {
+    "start": "electron .",
+    "test": "node --test \"test/**/*.test.js\"",
     "check:version": "node scripts/check-version.mjs",
-    "test": "node --test test/"
+    "typecheck:e2e": "node ../node_modules/typescript/bin/tsc -p e2e/tsconfig.json",
+    "smoke": "node ../node_modules/@playwright/test/cli.js test --config e2e/playwright.config.ts --trace off",
+    "icon": "node scripts/render-icon.mjs",
+    "pack:dir": "electron-builder --dir --config electron-builder.config.cjs --publish never",
+    "dist:win": "npm run check:version && electron-builder --win nsis --x64 --config electron-builder.config.cjs --publish never"
   },
   "devDependencies": {
     "electron": "45.3.2",

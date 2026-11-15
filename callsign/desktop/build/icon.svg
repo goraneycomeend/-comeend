@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!--
+    콜사인 앱 아이콘 원본. build/icon.png 는 scripts/render-icon.mjs 가 이 파일에서 만든다(직접 고치지 말 것).
+
+    흑연색 판 위에, 말소리처럼 부풀었다 잦아드는 막대 다섯 개. 앱 안의 요원 문양(성문)과 같은 말씨로 그렸다.
+    16px 로 줄여도 막대가 픽셀에 딱 맞게 32 단위 격자(512 ÷ 16) 위에 놓았다: 막대 폭 64, 간격 32.
+    색은 앱의 토큰에서 왔다: 판 #0f1112(흑연) · 테두리 #30353a(괘선) · 막대 #d8a548(기본 요원 색) · 밝은 막대 #e9eae6(종이)
+  -->
+  <rect width="512" height="512" rx="112" fill="#30353a"/>
+  <rect x="10" y="10" width="492" height="492" rx="103" fill="#0f1112"/>
+  <g fill="#d8a548">
+    <rect x="32" y="192" width="64" height="128" rx="32"/>
+    <rect x="128" y="128" width="64" height="256" rx="32"/>
+    <rect x="320" y="160" width="64" height="192" rx="32"/>
+    <rect x="416" y="224" width="64" height="64" rx="32"/>
+  </g>
+  <rect x="224" y="64" width="64" height="384" rx="32" fill="#e9eae6"/>
+</svg>

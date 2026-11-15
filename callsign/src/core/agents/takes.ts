@@ -3,6 +3,8 @@
 // 같은 대사라도 난수 시드에 따라 억양과 쉼이 조금씩 다르게 나온다(사람이 같은 대사를 여러 번 읽는 것과 같다).
 // 대사마다 테이크를 3개(첫 요원은 6개) 만들어 받아쓰기 오류율·문장 안 쉼 길이·음질 추정값을 재고,
 // 가장 또렷하고 자연스럽게 나온 테이크 번호를 여기 적어 둔다(사람이 귀로 고른 것이 아니라 측정값으로 고른 것이다).
+// 점수가 비슷할 때는 배역에 맞는 쪽을 골랐다: 목소리 높이가 가까운 요원끼리(또랑·깐깐, 걸걸·느긋, 나긋·시큰둥)
+// 한쪽은 조금 높게, 다른 쪽은 조금 낮게 나온 테이크를 써서 서로 더 잘 구분되게 했다.
 // 적혀 있지 않은 대사는 0번 테이크를 쓴다. 클립을 만드는 스크립트(scripts/render-clips.mjs)가 이 표를 읽는다.
 // 대사 글이나 목소리 값을 바꾸면 그 대사의 테이크는 다시 골라야 한다(표에 남은 번호도 틀린 것은 아니지만 고른 근거가 사라진다).
 
@@ -21,14 +23,12 @@ export const LINE_TAKES: Readonly<Record<string, number>> = {
 
   'geolgeol/sample': 1,
   'geolgeol/ready-1': 1,
-  'geolgeol/tactics-1': 2,
-  'geolgeol/tactics-2': 2,
+  'geolgeol/ready-2': 1,
+  'geolgeol/tactics-2': 1,
   'geolgeol/clutch-1': 2,
   'geolgeol/clutch-2': 2,
-  'geolgeol/banter-2': 1,
-  'geolgeol/victory-1': 2,
+  'geolgeol/victory-1': 1,
   'geolgeol/comfort-1': 2,
-  'geolgeol/comfort-2': 2,
 
   'najik/sample': 2,
   'najik/greeting-2': 1,
@@ -42,9 +42,10 @@ export const LINE_TAKES: Readonly<Record<string, number>> = {
 
   'sikeundung/sample': 1,
   'sikeundung/greeting-1': 2,
-  'sikeundung/greeting-2': 1,
-  'sikeundung/clutch-1': 1,
+  'sikeundung/greeting-2': 2,
+  'sikeundung/clutch-1': 2,
   'sikeundung/clutch-2': 1,
+  'sikeundung/banter-1': 2,
   'sikeundung/comfort-1': 1,
   'sikeundung/comfort-2': 1,
 
@@ -60,8 +61,9 @@ export const LINE_TAKES: Readonly<Record<string, number>> = {
   'ttorang/sample': 2,
   'ttorang/tactics-1': 1,
   'ttorang/clutch-2': 1,
+  'ttorang/victory-1': 1,
+  'ttorang/victory-2': 2,
   'ttorang/comfort-1': 2,
-  'ttorang/comfort-2': 1,
 
   'kkankkan/sample': 2,
   'kkankkan/greeting-1': 1,
@@ -69,22 +71,23 @@ export const LINE_TAKES: Readonly<Record<string, number>> = {
   'kkankkan/ready-2': 1,
   'kkankkan/clutch-1': 1,
   'kkankkan/clutch-2': 1,
-  'kkankkan/banter-1': 2,
+  'kkankkan/banter-1': 1,
   'kkankkan/victory-1': 1,
   'kkankkan/comfort-1': 2,
-  'kkankkan/comfort-2': 1,
+  'kkankkan/comfort-2': 2,
 
-  'neugeut/sample': 1,
+  'neugeut/sample': 2,
+  'neugeut/ready-2': 1,
   'neugeut/tactics-1': 1,
-  'neugeut/clutch-2': 1,
+  'neugeut/clutch-1': 1,
   'neugeut/banter-1': 2,
   'neugeut/victory-1': 2,
+  'neugeut/comfort-1': 1,
 
+  'nageut/sample': 2,
   'nageut/greeting-1': 1,
   'nageut/greeting-2': 2,
   'nageut/ready-1': 2,
-  'nageut/ready-2': 2,
-  'nageut/banter-1': 2,
   'nageut/victory-2': 2,
 
   'neungcheong/sample': 2,

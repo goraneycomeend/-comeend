@@ -123,23 +123,23 @@
     "geolgeol/ready-2": {
       "key": "660e58e1d3992047",
       "file": "geolgeol/ready-2.mp3",
-      "durationSec": 2.54,
-      "bytes": 31033,
-      "take": 0
+      "durationSec": 2.69,
+      "bytes": 32601,
+      "take": 1
     },
     "geolgeol/tactics-1": {
       "key": "4839a6872870491b",
       "file": "geolgeol/tactics-1.mp3",
-      "durationSec": 2.7,
-      "bytes": 32914,
-      "take": 2
+      "durationSec": 2.64,
+      "bytes": 32287,
+      "take": 0
     },
     "geolgeol/tactics-2": {
       "key": "31bfb9de7567fd8a",
       "file": "geolgeol/tactics-2.mp3",
-      "durationSec": 2.7,
-      "bytes": 32914,
-      "take": 2
+      "durationSec": 2.73,
+      "bytes": 33228,
+      "take": 1
     },
     "geolgeol/clutch-1": {
       "key": "29f3fd0dd6dacc18",
@@ -163,18 +163,18 @@
       "take": 0
     },
     "geolgeol/banter-2": {
-      "key": "45741e0fd8ef9003",
+      "key": "92821301282e420a",
       "file": "geolgeol/banter-2.mp3",
-      "durationSec": 2.87,
+      "durationSec": 2.85,
       "bytes": 34795,
-      "take": 1
+      "take": 0
     },
     "geolgeol/victory-1": {
       "key": "d89c0dcf5b4aee29",
       "file": "geolgeol/victory-1.mp3",
-      "durationSec": 3.07,
-      "bytes": 37303,
-      "take": 2
+      "durationSec": 2.92,
+      "bytes": 35422,
+      "take": 1
     },
     "geolgeol/victory-2": {
       "key": "684766427f41ff09",
@@ -193,9 +193,9 @@
     "geolgeol/comfort-2": {
       "key": "3a75e103e50378e2",
       "file": "geolgeol/comfort-2.mp3",
-      "durationSec": 2.67,
-      "bytes": 32601,
-      "take": 2
+      "durationSec": 2.63,
+      "bytes": 31974,
+      "take": 0
     },
     "najik/sample": {
       "key": "3a00d52b1f2488fc",
@@ -312,9 +312,9 @@
     "sikeundung/greeting-2": {
       "key": "9065b114b35de76b",
       "file": "sikeundung/greeting-2.mp3",
-      "durationSec": 3.39,
-      "bytes": 41065,
-      "take": 1
+      "durationSec": 3.57,
+      "bytes": 43259,
+      "take": 2
     },
     "sikeundung/ready-1": {
       "key": "b8209c2538d7a89d",
@@ -340,9 +340,9 @@
     "sikeundung/clutch-1": {
       "key": "274425dd307a2347",
       "file": "sikeundung/clutch-1.mp3",
-      "durationSec": 2.99,
-      "bytes": 36362,
-      "take": 1
+      "durationSec": 2.83,
+      "bytes": 34482,
+      "take": 2
     },
     "sikeundung/clutch-2": {
       "key": "a19e1880879b9269",
@@ -354,9 +354,9 @@
     "sikeundung/banter-1": {
       "key": "c65f63c40f9eb90f",
       "file": "sikeundung/banter-1.mp3",
-      "durationSec": 3.37,
-      "bytes": 41065,
-      "take": 0
+      "durationSec": 3.47,
+      "bytes": 42005,
+      "take": 2
     },
     "sikeundung/banter-2": {
       "key": "24f44a0e68c76a30",
@@ -564,16 +564,16 @@
     "ttorang/victory-1": {
       "key": "cce48be6f01dd434",
       "file": "ttorang/victory-1.mp3",
-      "durationSec": 3.08,
-      "bytes": 37303,
-      "take": 0
+      "durationSec": 3.04,
+      "bytes": 36989,
+      "take": 1
     },
     "ttorang/victory-2": {
       "key": "7fbb582597bea61e",
       "file": "ttorang/victory-2.mp3",
-      "durationSec": 2.94,
-      "bytes": 35736,
-      "take": 0
+      "durationSec": 2.85,
+      "bytes": 34795,
+      "take": 2
     },
     "ttorang/comfort-1": {
       "key": "e8371f364312f003",
@@ -585,9 +585,9 @@
     "ttorang/comfort-2": {
       "key": "8d59dadcc34b2ca1",
       "file": "ttorang/comfort-2.mp3",
-      "durationSec": 3.48,
-      "bytes": 42318,
-      "take": 1
+      "durationSec": 3.45,
+      "bytes": 42005,
+      "take": 0
     },
     "kkankkan/sample": {
       "key": "2168c73f268a3bca",
@@ -655,9 +655,9 @@
     "kkankkan/banter-1": {
       "key": "1373292f8823412d",
       "file": "kkankkan/banter-1.mp3",
-      "durationSec": 3.39,
+      "durationSec": 3.38,
       "bytes": 41065,
-      "take": 2
+      "take": 1
     },
     "kkankkan/victory-1": {
       "key": "074c414689fa8179",
@@ -683,16 +683,16 @@
     "kkankkan/comfort-2": {
       "key": "2a8989d32c040a3a",
       "file": "kkankkan/comfort-2.mp3",
-      "durationSec": 3.02,
-      "bytes": 36676,
-      "take": 1
+      "durationSec": 3.11,
+      "bytes": 37930,
+      "take": 2
     },
     "neugeut/sample": {
       "key": "b56462f298f1df97",
       "file": "neugeut/sample.mp3",
-      "durationSec": 3.57,
-      "bytes": 43259,
-      "take": 1
+      "durationSec": 3.69,
+      "bytes": 44826,
+      "take": 2
     },
     "neugeut/greeting-1": {
       "key": "cb1cf2a024f79221",
@@ -720,7 +720,7 @@
       "file": "neugeut/ready-2.mp3",
       "durationSec": 2.86,
       "bytes": 34795,
-      "take": 0
+      "take": 1
     },
     "neugeut/tactics-1": {
       "key": "5f491837d8b9d1b9",
@@ -732,16 +732,16 @@
     "neugeut/clutch-1": {
       "key": "26601fa693942773",
       "file": "neugeut/clutch-1.mp3",
-      "durationSec": 3.57,
-      "bytes": 43259,
-      "take": 0
+      "durationSec": 3.52,
+      "bytes": 42632,
+      "take": 1
     },
     "neugeut/clutch-2": {
       "key": "4d0330510c7ee0bf",
       "file": "neugeut/clutch-2.mp3",
-      "durationSec": 3.35,
-      "bytes": 40751,
-      "take": 1
+      "durationSec": 3.45,
+      "bytes": 42005,
+      "take": 0
     },
     "neugeut/banter-1": {
       "key": "10725885385169fe",
@@ -774,9 +774,9 @@
     "neugeut/comfort-1": {
       "key": "623a735efbcf1849",
       "file": "neugeut/comfort-1.mp3",
-      "durationSec": 3.64,
-      "bytes": 44199,
-      "take": 0
+      "durationSec": 3.72,
+      "bytes": 45140,
+      "take": 1
     },
     "neugeut/comfort-2": {
       "key": "19c13b605c302626",
@@ -788,9 +788,9 @@
     "nageut/sample": {
       "key": "22f44a0aa94076a0",
       "file": "nageut/sample.mp3",
-      "durationSec": 4.15,
-      "bytes": 50155,
-      "take": 0
+      "durationSec": 4.05,
+      "bytes": 49215,
+      "take": 2
     },
     "nageut/greeting-1": {
       "key": "c6c2bd20574ef1b2",
@@ -816,9 +816,9 @@
     "nageut/ready-2": {
       "key": "f05fd8b5af4b8ff4",
       "file": "nageut/ready-2.mp3",
-      "durationSec": 3.97,
-      "bytes": 47961,
-      "take": 2
+      "durationSec": 4.04,
+      "bytes": 48901,
+      "take": 0
     },
     "nageut/tactics-1": {
       "key": "a5970a0548d47b30",
@@ -851,9 +851,9 @@
     "nageut/banter-1": {
       "key": "383c417018dc6752",
       "file": "nageut/banter-1.mp3",
-      "durationSec": 4.39,
-      "bytes": 53290,
-      "take": 2
+      "durationSec": 4.56,
+      "bytes": 55171,
+      "take": 0
     },
     "nageut/banter-2": {
       "key": "19d83fef2346959f",
