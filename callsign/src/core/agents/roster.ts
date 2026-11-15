@@ -47,7 +47,7 @@ export const ROSTER: AgentDef[] = [
     bio: '새벽 수산시장에서 경매를 붙이던 사람이라 목이 늘 반쯤 쉬어 있다. 재고 따지는 걸 못 참아서 일단 들어가고 본다. 싸움이 끝나면 꼭 밥은 먹었는지부터 묻는다.',
     traits: ['굵은 중저음', '호탕한 웃음', '밥부터 챙기는 말버릇'],
     color: '#e8804f',
-    voice: { blend: { M4: 1 }, speed: 1.1, fx: fx({ warmth: 0.2, presence: 0.15, punch: 0.3, room: 0.1 }) },
+    voice: { blend: { M3: 1 }, speed: 1.04, fx: fx({ warmth: 0.2, presence: 0.1, punch: 0.3, room: 0.1 }) },
     lines: GEOLGEOL_LINES,
   },
   {
@@ -73,7 +73,7 @@ export const ROSTER: AgentDef[] = [
     bio: '출판사에서 남의 원고 틀린 곳만 십 년을 찾았다. 그래서 상대가 어디서 어긋나게 움직이는지 누구보다 먼저 본다. 다만 알려 주는 말투가 좀 심드렁할 뿐이다.',
     traits: ['낮게 깔린 톤', '힘을 뺀 말투', '한숨 섞인 말끝'],
     color: '#b3c264',
-    voice: { blend: { F5: 1 }, speed: 0.98, fx: fx({ warmth: 0.1, presence: -0.1, punch: 0.1, room: 0.15 }) },
+    voice: { blend: { F5: 1 }, speed: 0.96, fx: fx({ warmth: 0.1, presence: -0.1, punch: 0.1, room: 0.15 }) },
     lines: SIKEUNDUNG_LINES,
   },
   {
@@ -85,7 +85,7 @@ export const ROSTER: AgentDef[] = [
     bio: '기상 예보관이었다. 감으로 말하는 법이 없고, 늘 근거와 확률을 붙여서 조곤조곤 설명한다. 예보가 빗나가면 변명하는 대신 다음 예보를 고친다.',
     traits: ['차분한 중음', '또박또박한 설명', '확률로 말하는 버릇'],
     color: '#58c4d8',
-    voice: { blend: { M1: 1 }, speed: 1.0, fx: fx({ presence: 0.15, punch: 0.2, room: 0.1 }) },
+    voice: { blend: { M4: 1 }, speed: 0.98, fx: fx({ presence: 0.15, punch: 0.2, room: 0.1 }) },
     lines: JOGON_LINES,
   },
   {
@@ -97,7 +97,7 @@ export const ROSTER: AgentDef[] = [
     bio: '분대 막내. 학교 방송부에서 아침 방송을 맡았던 덕에 발음 하나는 누구보다 또렷하다. 본 것은 빠짐없이 보고하려다가 안 해도 될 말까지 가끔 한다.',
     traits: ['또렷한 발음', '씩씩한 말끝', '가끔 새는 본심'],
     color: '#5fd3a0',
-    voice: { blend: { F1: 1 }, speed: 1.05, fx: fx({ presence: 0.25, air: 0.15, punch: 0.2, room: 0.12 }) },
+    voice: { blend: { F4: 0.7, F2: 0.3 }, speed: 1.03, fx: fx({ presence: 0.25, air: 0.15, punch: 0.2, room: 0.12 }) },
     lines: TTORANG_LINES,
   },
 
@@ -111,7 +111,7 @@ export const ROSTER: AgentDef[] = [
     bio: '항공기 정비 검수원이었다. 나사 하나도 그냥 넘긴 적이 없는 사람이라, 맡은 자리는 점검표대로 끝까지 지킨다. 칭찬은 드물지만 한번 합격이라고 하면 진짜다.',
     traits: ['단단한 톤', '딱 끊는 말끝', '점검하듯 세는 버릇'],
     color: '#9c9df2',
-    voice: { blend: { F4: 1 }, speed: 1.02, fx: fx({ warmth: -0.1, presence: 0.2, punch: 0.3, room: 0.08 }) },
+    voice: { blend: { F1: 0.5, F4: 0.5 }, speed: 1.0, fx: fx({ warmth: -0.1, presence: 0.2, punch: 0.3, room: 0.08 }) },
     lines: KKANKKAN_LINES,
   },
   {
@@ -137,7 +137,7 @@ export const ROSTER: AgentDef[] = [
     bio: '응급 신고 전화를 받던 상황실 요원이었다. 수화기 너머 사람을 목소리 하나로 진정시키던 솜씨로, 지금은 분대의 숨을 고르게 한다. 화내는 모습을 본 사람이 아직 없다.',
     traits: ['부드러운 중음', '느리고 고른 호흡', '안심시키는 말끝'],
     color: '#ea9bb0',
-    voice: { blend: { F3: 1 }, speed: 0.95, fx: fx({ warmth: 0.15, presence: -0.05, air: 0.1, punch: 0.1, room: 0.18 }) },
+    voice: { blend: { F3: 0.7, F1: 0.3 }, speed: 0.95, fx: fx({ warmth: 0.15, presence: -0.05, air: 0.1, punch: 0.1, room: 0.18 }) },
     lines: NAGEUT_LINES,
   },
   {
@@ -149,7 +149,7 @@ export const ROSTER: AgentDef[] = [
     bio: '홈쇼핑 생방송을 진행하던 사람. 어떤 상황이든 지금이 기회라고 띄우는 재주가 있어서, 처진 분대도 금세 솔깃하게 만든다. 진심인지 농담인지는 본인만 안다.',
     traits: ['매끄러운 중음', '능글맞은 억양', '물건 팔듯 띄우는 말'],
     color: '#cf86e0',
-    voice: { blend: { M3: 1 }, speed: 1.04, fx: fx({ warmth: 0.1, presence: 0.1, air: 0.1, punch: 0.3, room: 0.1 }) },
+    voice: { blend: { M1: 0.7, M4: 0.3 }, speed: 1.07, fx: fx({ warmth: 0.1, presence: 0.1, air: 0.1, punch: 0.3, room: 0.1 }) },
     lines: NEUNGCHEONG_LINES,
   },
 ];
