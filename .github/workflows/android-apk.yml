@@ -5,6 +5,9 @@ on:
     branches: ['**']
     paths-ignore:
       - '**.md'
+      # 별도 앱(콜사인)만 바뀐 푸시에는 스킨지기 APK 를 다시 빌드하지 않는다
+      - 'callsign/**'
+      - '.github/workflows/callsign*.yml'
   workflow_dispatch:
 
 permissions:
