@@ -1,0 +1,123 @@
+/*
+ * 콜사인의 시각 체계. 화면의 모든 색·글자·간격은 여기 토큰에서만 가져온다.
+ *
+ * 레이아웃 개념: 왼쪽에 채널 눈금이 달린 "음성 기록지".
+ * 내용은 전부 왼쪽 정렬된 줄이고, 요원 색은 그 줄이 누구 채널인지 표시하는 데만 쓴다.
+ */
+
+/* 영문 콜사인·숫자용 글꼴(라틴만, 앱에 함께 들어간다). 한글은 기기의 기본 글꼴을 쓴다. */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../../../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2') format('woff2');
+  unicode-range: U+0020-007E, U+00A0-00FF, U+2013-2014, U+2018-2019, U+201C-201D, U+2022, U+2026, U+2212;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../../../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-600-normal.woff2') format('woff2');
+  unicode-range: U+0020-007E, U+00A0-00FF, U+2013-2014, U+2018-2019, U+201C-201D, U+2022, U+2026, U+2212;
+}
+
+/* 요원을 바꾸면 색이 부드럽게 넘어가도록 색 타입으로 등록해 둔다 */
+@property --agent {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #d8a548;
+}
+
+:root {
+  color-scheme: dark;
+
+  /* ── 색: 이름 붙인 여섯 가지 ─────────────────────────────── */
+  /* 요원 색. 선택한 요원의 color 가 들어온다(App 이 주입). 중립색은 전부 이 색 쪽으로 살짝 기운다 */
+  --agent: #d8a548;
+  /* 흑연: 바탕 */
+  --graphite: color-mix(in oklab, var(--agent) 4%, #0f1112);
+  /* 석판: 바탕 위로 올라온 면(패널, 시트) */
+  --slate: color-mix(in oklab, var(--agent) 6%, #181b1d);
+  /* 괘선: 줄과 테두리 */
+  --rule: color-mix(in oklab, var(--agent) 12%, #30353a);
+  /* 종이: 본문 글자 */
+  --paper: color-mix(in oklab, var(--agent) 5%, #e9eae6);
+  /* 연필: 덜 중요한 글자 */
+  --pencil: color-mix(in oklab, var(--agent) 9%, #9da2a5);
+
+  /* 요원 색에서 나온 값들 */
+  /* 어두운 바탕 위 글자로 써도 읽히게 밝힌 요원 색 (App 이 계산해 넣는다) */
+  --agent-ink: var(--agent);
+  /* 요원 색으로 칠한 면 위에 올리는 글자색 (App 이 계산해 넣는다) */
+  --on-agent: #101213;
+  --agent-wash: color-mix(in oklab, var(--agent) 13%, var(--graphite));
+  --agent-line: color-mix(in oklab, var(--agent) 55%, var(--rule));
+  --slate-hover: color-mix(in oklab, var(--paper) 5%, var(--slate));
+  --sunken: color-mix(in oklab, #000 28%, var(--graphite));
+
+  /* 상태 신호: 녹음·오류 / 주의 / 준비됨 */
+  --signal-red: #e2583d;
+  --signal-amber: #e3b04b;
+  --signal-green: #7ecb9c;
+  --focus: var(--paper);
+
+  /* ── 글자 ──────────────────────────────────────────────── */
+  --font-body:
+    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic',
+    '맑은 고딕', 'Noto Sans KR', 'Noto Sans CJK KR', 'Segoe UI', system-ui, sans-serif;
+  /* 영문·숫자 표기용. 한글이 섞이면 뒤쪽의 기본 한글 글꼴로 넘어간다 */
+  --font-data:
+    'IBM Plex Mono', ui-monospace, 'Cascadia Mono', Consolas, 'SF Mono', Menlo, 'Roboto Mono', 'Malgun Gothic',
+    'Apple SD Gothic Neo', 'Noto Sans KR', monospace;
+
+  /* 역할: 굵기 크기/줄높이 글꼴 */
+  --t-display: 800 1.75rem/1.2 var(--font-body);
+  --t-title: 700 1.3125rem/1.3 var(--font-body);
+  --t-head: 700 1rem/1.4 var(--font-body);
+  --t-body: 400 0.9375rem/1.6 var(--font-body);
+  --t-small: 400 0.8125rem/1.5 var(--font-body);
+  --t-data: 400 0.8125rem/1.35 var(--font-data);
+  --t-label: 400 0.6875rem/1.2 var(--font-data);
+  --track-label: 0.09em;
+  /* 한글로 적는 작은 이름표(영문·숫자 이름표는 --t-label) */
+  --t-caption: 600 0.75rem/1.3 var(--font-body);
+
+  /* ── 간격 ──────────────────────────────────────────────── */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --s7: 48px;
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+
+  /* ── 모양 ──────────────────────────────────────────────── */
+  --tap: 44px;
+  --r-s: 3px;
+  --r-m: 6px;
+  --r-l: 12px;
+  --hair: 1px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur: 160ms;
+  --shadow-lift: 0 18px 48px rgb(0 0 0 / 0.5);
+
+  /* 눈금: 8px 마다 짧은 금, 40px 마다 긴 금 */
+  --tick-minor: 8px;
+  --tick-major: 40px;
+  --nav-w: 248px;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --t-display: 800 2rem/1.2 var(--font-body);
+    --t-title: 700 1.5rem/1.3 var(--font-body);
+    --gutter-l: 32px;
+    --gutter-r: 32px;
+  }
+}

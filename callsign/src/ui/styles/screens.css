@@ -1,0 +1,308 @@
+/* 요원 화면과 정보 화면의 모양. (다른 화면은 각자 자기 폴더의 CSS 를 쓴다) */
+
+/* ── 요원 명단 ──────────────────────────────────────────── */
+.roster-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--s2);
+  margin: calc(var(--s2) * -1) 0;
+}
+.roster {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s2);
+}
+.roster > li {
+  display: grid;
+  min-width: 0;
+}
+@media (max-width: 479px) {
+  /* 좁은 화면에서는 한 줄에 들어가게 개수는 감춘다 */
+  .roster-filter .chip__count {
+    display: none;
+  }
+}
+.roster-empty {
+  padding: var(--s5) 0;
+  color: var(--pencil);
+}
+@media (min-width: 600px) {
+  .roster {
+    grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
+    gap: var(--s3);
+  }
+}
+
+.switcher {
+  display: grid;
+}
+.switcher > li:last-child .agent-row {
+  border-bottom: 0;
+}
+
+/* ── 요원 상세 ──────────────────────────────────────────── */
+.detail {
+  display: grid;
+  gap: var(--s4);
+  min-width: 0;
+}
+.detail__strip {
+  display: block;
+  border-top: var(--hair) solid var(--rule);
+  border-bottom: var(--hair) solid var(--rule);
+  background: var(--sunken);
+}
+.detail__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  font: 500 0.8125rem/1.2 var(--font-body);
+  color: var(--pencil);
+}
+.detail__name {
+  margin-top: 6px;
+}
+.detail__en {
+  margin-top: 6px;
+  color: var(--pencil);
+}
+.detail__tagline {
+  padding-left: var(--s3);
+  border-left: 3px solid var(--agent);
+}
+.detail__bio {
+  color: var(--pencil);
+}
+.detail__traits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.detail__sample {
+  display: flex;
+  align-items: center;
+  gap: var(--s4);
+  padding: var(--s3) var(--s4) var(--s3) var(--s3);
+  border: var(--hair) solid var(--agent-line);
+  border-radius: var(--r-s);
+  background: var(--agent-wash);
+}
+.detail__quote {
+  margin-top: var(--s1);
+  font: 600 1rem/1.5 var(--font-body);
+}
+.detail__empty {
+  font: var(--t-small);
+  color: var(--pencil);
+}
+.detail__record {
+  display: grid;
+  border-top: var(--hair) solid var(--rule);
+}
+.detail__record > div {
+  display: grid;
+  grid-template-columns: 6.5em minmax(0, 1fr);
+  gap: var(--s3);
+  padding: var(--s2) 0;
+  border-bottom: var(--hair) solid var(--rule);
+  font: var(--t-small);
+}
+.detail__record dt {
+  color: var(--pencil);
+}
+.detail__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+}
+.detail__actions > .btn {
+  flex: 1 1 200px;
+}
+
+/* 넓은 화면: 상세가 오른쪽 단의 패널이 된다 */
+@media (min-width: 1024px) {
+  .split__side > .detail {
+    padding: 0 var(--s5) var(--s5);
+    border: var(--hair) solid var(--rule);
+    border-radius: var(--r-m);
+    background: var(--slate);
+  }
+  .split__side > .detail > .detail__strip {
+    margin: 0 calc(var(--s5) * -1);
+    width: calc(100% + var(--s5) * 2);
+    border-top: 0;
+    border-radius: var(--r-m) var(--r-m) 0 0;
+  }
+}
+
+/* ── 정보 ───────────────────────────────────────────────── */
+.about {
+  display: grid;
+  max-width: 760px;
+}
+.about__entry {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  gap: var(--s2);
+  padding: var(--s4) 0 var(--s5);
+  border-top: var(--hair) solid var(--rule);
+}
+.about__entry:first-child {
+  padding-top: var(--s3);
+}
+.about__no {
+  padding-top: 5px;
+  color: var(--agent-ink);
+}
+.about__content {
+  display: grid;
+  gap: var(--s3);
+  min-width: 0;
+}
+.about__content > p,
+.bullets {
+  color: var(--pencil);
+}
+.bullets {
+  display: grid;
+  gap: var(--s2);
+}
+.bullets li {
+  position: relative;
+  padding-left: var(--s4);
+}
+.bullets li::before {
+  content: '';
+  position: absolute;
+  top: 0.62em;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  background: var(--agent);
+}
+.kinds {
+  display: grid;
+  gap: var(--s2);
+}
+.kinds li {
+  display: flex;
+  gap: var(--s3);
+  padding: var(--s3);
+  border: var(--hair) solid var(--rule);
+  border-radius: var(--r-s);
+  background: var(--slate);
+}
+.kinds__icon {
+  margin-top: 2px;
+  color: var(--agent-ink);
+}
+.kinds__name {
+  font-weight: 700;
+}
+.kinds__kind {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border: var(--hair) solid var(--agent-line);
+  border-radius: var(--r-s);
+  font: 600 0.75rem/1.4 var(--font-body);
+  color: var(--agent-ink);
+}
+.credits {
+  display: grid;
+  border-top: var(--hair) solid var(--rule);
+}
+.credits li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px var(--s3);
+  padding: var(--s2) 0;
+  border-bottom: var(--hair) solid var(--rule);
+}
+.credits__name {
+  font-weight: 700;
+}
+.credits__license {
+  grid-row: 1;
+  grid-column: 2;
+  align-self: center;
+  color: var(--agent-ink);
+}
+.credits__use {
+  grid-column: 1 / -1;
+  font: var(--t-small);
+  color: var(--pencil);
+}
+
+.about__card {
+  display: grid;
+  gap: var(--s3);
+  padding: var(--s4);
+  border: var(--hair) solid var(--rule);
+  border-radius: var(--r-m);
+  background: var(--slate);
+}
+.about__card-title {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+.about__card-title svg {
+  color: var(--agent-ink);
+}
+.keys {
+  width: 100%;
+}
+.keys tr + tr > * {
+  border-top: var(--hair) solid var(--rule);
+}
+.keys th,
+.keys td {
+  padding: var(--s2) 0;
+  font: var(--t-small);
+  text-align: left;
+  vertical-align: middle;
+}
+.keys th {
+  width: 7.5rem;
+  padding-right: var(--s3);
+  white-space: nowrap;
+}
+.keys td {
+  color: var(--pencil);
+}
+.keys kbd {
+  display: inline-block;
+  min-width: 1.75rem;
+  padding: 3px 6px;
+  border: var(--hair) solid var(--rule);
+  border-bottom-width: 2px;
+  border-radius: var(--r-s);
+  background: var(--sunken);
+  font: var(--t-label);
+  color: var(--paper);
+  text-align: center;
+}
+.keys kbd + kbd {
+  margin-left: var(--s1);
+}
+.keys__sep {
+  margin: 0 var(--s1);
+  color: var(--pencil);
+}
+.facts {
+  display: grid;
+}
+.facts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s3);
+  padding: var(--s2) 0;
+  font: var(--t-small);
+}
+.facts > div + div {
+  border-top: var(--hair) solid var(--rule);
+}
+.facts dt {
+  color: var(--pencil);
+}
